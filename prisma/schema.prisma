@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String?  // Optional for now to support existing users or OAuth later
+  name      String?
+  role      String   @default("USER") // ADMIN, USER
+  createdAt DateTime @default(now())
+  reservations Reservation[]
+}
+
+model PC {
+  id          String   @id @default(uuid())
+  name        String
+  status      String   @default("AVAILABLE") // AVAILABLE, MAINTENANCE, BUSY
+  parsecLink  String?  // The daily updated link
+  createdAt   DateTime @default(now())
+  reservations Reservation[]
+}
+
+model Reservation {
+  id        String   @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("CONFIRMED") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  pcId      String
+  pc        PC       @relation(fields: [pcId], references: [id])
+
+  createdAt DateTime @default(now())
+}

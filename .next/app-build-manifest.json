@@ -1,0 +1,35 @@
+{
+  "pages": {
+    "/admin/agendamientos/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/agendamientos/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/css-app_globals_css-node_modules_next_font_google_target_css-node_modules_next_font_google_ta-77a3b2.css",
+      "static/chunks/app/layout.js"
+    ],
+    "/admin/pcs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/pcs/page.js"
+    ],
+    "/admin/juegos/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/juegos/page.js"
+    ],
+    "/admin/logros/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/logros/page.js"
+    ],
+    "/admin/usuarios/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/usuarios/page.js"
+    ]
+  }
+}
