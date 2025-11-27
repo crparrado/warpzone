@@ -1,5 +1,6 @@
 import { Ticket, Clock, Zap } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
+import BuyButton from "@/components/BuyButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -59,9 +60,7 @@ export default async function FichasYPases() {
 
                 <div className="mt-auto">
                   <div className="text-3xl font-bold text-white mb-6">${product.price.toLocaleString('es-CL')}</div>
-                  <button className={`w-full py-3 font-bold font-orbitron transition-colors ${product.type === 'Pase' ? 'bg-neon-magenta text-black hover:bg-white' : 'bg-neon-cyan text-black hover:bg-white'}`}>
-                    COMPRAR
-                  </button>
+                  <BuyButton product={product} />
                 </div>
               </div>
             );

@@ -25,8 +25,23 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await prisma.reservation.delete({
-    where: { id },
+  // Calculate refund amount
+  const start = new Date(reservation.startTime);
+  const end = new Date(reservation.endTime);
+  const durationMs = end.getTime() - start.getTime();
+  const durationMinutes = Math.floor(durationMs / (1000 * 60));
+
+  await prisma.$transaction(async (tx) => {
+    // Refund minutes
+    await tx.user.update({
+      where: { id: user.id },
+      data: { minutes: { increment: durationMinutes } }
+    });
+
+    // Delete reservation
+    await tx.reservation.delete({
+      where: { id },
+    });
   });
 
   return NextResponse.json({ success: true });

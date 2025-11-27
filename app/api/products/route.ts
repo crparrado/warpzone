@@ -10,6 +10,7 @@ const DEFAULT_PRODUCTS = [
         name: "Ficha 1 Hora",
         price: 2000,
         type: "Ficha",
+        minutes: 60,
         description: "Acceso por 1 hora a cualquier PC.",
         popular: false
     },
@@ -17,6 +18,7 @@ const DEFAULT_PRODUCTS = [
         name: "Ficha 3 Horas",
         price: 5000,
         type: "Ficha",
+        minutes: 180,
         description: "Ahorra y juega más tiempo.",
         popular: true
     },
@@ -24,6 +26,7 @@ const DEFAULT_PRODUCTS = [
         name: "Ficha 5 Horas",
         price: 8000,
         type: "Ficha",
+        minutes: 300,
         description: "Para sesiones intensivas.",
         popular: false
     },
@@ -31,6 +34,7 @@ const DEFAULT_PRODUCTS = [
         name: "Day Pass",
         price: 15000,
         type: "Pase",
+        minutes: 720, // 12 hours
         description: "Acceso ilimitado por un día (10:00 - 22:00).",
         popular: false
     },
@@ -38,6 +42,7 @@ const DEFAULT_PRODUCTS = [
         name: "Night Pass (Coruja)",
         price: 12000,
         type: "Pase",
+        minutes: 480, // 8 hours
         description: "Acceso nocturno exclusivo (22:00 - 06:00).",
         popular: false
     },

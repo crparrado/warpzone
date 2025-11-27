@@ -16,6 +16,7 @@ interface Reservation {
 interface User {
   name: string;
   email: string;
+  minutes: number;
 }
 
 export default function DashboardPage() {
@@ -91,8 +92,10 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold text-white">{reservations.length}</div>
           </div>
           <div className="glass p-6 border border-white/10">
-            <div className="text-gray-400 text-xs font-orbitron mb-2">FICHAS DISPONIBLES</div>
-            <div className="text-4xl font-bold text-neon-magenta">0</div>
+            <div className="text-gray-400 text-xs font-orbitron mb-2">TIEMPO DISPONIBLE</div>
+            <div className="text-4xl font-bold text-neon-magenta">
+              {user ? (user.minutes / 60).toFixed(1) : "0.0"} <span className="text-lg">hrs</span>
+            </div>
           </div>
           <Link href="/reservas" className="glass p-6 border border-neon-cyan/30 hover:bg-neon-cyan/10 transition-colors flex flex-col justify-center items-center text-center group">
             <Calendar className="w-8 h-8 text-neon-cyan mb-2 group-hover:scale-110 transition-transform" />

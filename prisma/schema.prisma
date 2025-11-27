@@ -13,6 +13,7 @@ model User {
   password  String?  // Optional for now to support existing users or OAuth later
   name      String?
   role      String   @default("USER") // ADMIN, USER
+  minutes   Int      @default(0)
   createdAt DateTime @default(now())
   reservations Reservation[]
 }
@@ -45,6 +46,7 @@ model Product {
   id          String   @id @default(uuid())
   name        String
   price       Int
+  minutes     Int      @default(60)
   type        String
   description String
   popular     Boolean  @default(false)
