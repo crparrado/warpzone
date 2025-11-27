@@ -12,7 +12,7 @@ export async function sendConfirmationEmail(email: string, reservationId: string
 
   try {
     const data = await resend.emails.send({
-      from: 'Warpzone <reservas@send.warpzone.cl>',
+      from: 'Warpzone <reservas@warpzone.cl>',
       to: [email],
       subject: '¡Reserva Confirmada en Warpzone! 🎮',
       react: ReservationEmail({
@@ -34,7 +34,7 @@ export async function sendParsecLinkEmail(email: string, parsecLink: string) {
 
   try {
     await resend.emails.send({
-      from: 'Warpzone <reservas@send.warpzone.cl>',
+      from: 'Warpzone <reservas@warpzone.cl>',
       to: [email],
       subject: '🎮 Tu Link de Acceso Warpzone',
       html: `
