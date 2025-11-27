@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Calendar, Monitor, Gamepad2, Trophy, BarChart3 } from "lucide-react";
+import { Users, Calendar, Monitor, Gamepad2, Trophy, BarChart3, DollarSign } from "lucide-react";
 
 const menuItems = [
     { name: "Dashboard", icon: BarChart3, href: "/admin" },
     { name: "Usuarios", icon: Users, href: "/admin/usuarios" },
     { name: "Agendamientos", icon: Calendar, href: "/admin/agendamientos" },
     { name: "PCs", icon: Monitor, href: "/admin/pcs" },
+    { name: "Productos", icon: DollarSign, href: "/admin/productos" },
     { name: "Juegos", icon: Gamepad2, href: "/admin/juegos" },
     { name: "Logros", icon: Trophy, href: "/admin/logros" },
 ];
