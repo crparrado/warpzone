@@ -5,8 +5,10 @@ import ReservationEmail from '@/components/emails/ReservationEmail';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendConfirmationEmail(email: string, reservationId: string, startTime: Date, userName: string, pcName: string) {
+  console.log(`[EMAIL] Attempting to send confirmation to ${email}`);
+
   if (!process.env.RESEND_API_KEY) {
-    console.log("⚠️ RESEND_API_KEY missing. Email not sent.");
+    console.error("⚠️ RESEND_API_KEY missing in environment variables.");
     return;
   }
 

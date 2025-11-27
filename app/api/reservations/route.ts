@@ -32,7 +32,14 @@ export async function POST(request: Request) {
     const durationMs = end.getTime() - start.getTime();
     const durationMinutes = Math.floor(durationMs / (1000 * 60));
 
+    console.log(`[RESERVATION] User: ${user.email}, Credits: ${user.minutes}, Cost: ${durationMinutes}`);
+
+    if (durationMinutes <= 0) {
+        return NextResponse.json({ error: "Duración inválida" }, { status: 400 });
+    }
+
     if (user.minutes < durationMinutes) {
+        console.log(`[RESERVATION] Insufficient funds. Required: ${durationMinutes}, Available: ${user.minutes}`);
         return NextResponse.json({
             error: `Saldo insuficiente. Necesitas ${durationMinutes} minutos, tienes ${user.minutes}.`
         }, { status: 400 });
