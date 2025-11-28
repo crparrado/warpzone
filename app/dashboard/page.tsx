@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Clock, Monitor, Trash2, LogOut, Trophy } from "lucide-react";
+import { Calendar, Clock, Monitor, Trash2, LogOut, Trophy, Gamepad2 } from "lucide-react";
 
 interface Reservation {
   id: string;
   startTime: string;
   endTime: string;
   pc: { name: string };
+  game?: { name: string };
   status: string;
 }
 
@@ -130,6 +131,12 @@ export default function DashboardPage() {
                     <div className="text-gray-400 text-sm">
                       {new Date(res.startTime).toLocaleDateString()} • {new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(res.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
+                    {res.game && (
+                      <div className="flex items-center gap-2 mt-1 text-neon-cyan text-sm">
+                        <Gamepad2 className="w-4 h-4" />
+                        <span className="font-bold">{res.game.name}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

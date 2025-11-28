@@ -21,6 +21,7 @@ interface ReservationEmailProps {
     date: string;
     time: string;
     reservationId: string;
+    gameName?: string;
 }
 
 export const ReservationEmail = ({
@@ -29,6 +30,7 @@ export const ReservationEmail = ({
     date,
     time,
     reservationId,
+    gameName,
 }: ReservationEmailProps) => (
     <Html>
         <Head />
@@ -65,6 +67,12 @@ export const ReservationEmail = ({
                                 <Text style={label}>EQUIPO</Text>
                                 <Text style={value}>{pcName}</Text>
                             </Column>
+                            <Column>
+                                <Text style={label}>JUEGO</Text>
+                                <Text style={value}>{gameName || "Escritorio Remoto"}</Text>
+                            </Column>
+                        </Row>
+                        <Row style={cardRow}>
                             <Column>
                                 <Text style={label}>ID RESERVA</Text>
                                 <Text style={valueId}>#{reservationId.slice(0, 8)}</Text>

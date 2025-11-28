@@ -129,7 +129,8 @@ export async function POST(request: Request) {
         reservation.id,
         reservation.startTime,
         user.name || "Gamer",
-        reservation.pc.name
+        reservation.pc.name,
+        reservation.game?.name // Pass game name
     );
 
     return NextResponse.json(reservation);

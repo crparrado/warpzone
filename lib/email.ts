@@ -6,7 +6,7 @@ import ParsecEmail from '@/components/emails/ParsecEmail';
 // This global initialization is removed as per instruction to initialize inside functions.
 
 
-export async function sendConfirmationEmail(email: string, reservationId: string, startTime: Date | string, userName: string, pcName: string) {
+export async function sendConfirmationEmail(email: string, reservationId: string, startTime: Date | string, userName: string, pcName: string, gameName?: string) {
   console.log(`[EMAIL] Attempting to send confirmation to ${email}`);
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -32,6 +32,7 @@ export async function sendConfirmationEmail(email: string, reservationId: string
   const safeUserName = userName || "Gamer";
   const safePcName = pcName || "PC Gamer";
   const safeReservationId = reservationId ? String(reservationId) : "N/A";
+  const safeGameName = gameName || "Escritorio Remoto";
 
   try {
     const data = await resend.emails.send({
@@ -43,7 +44,8 @@ export async function sendConfirmationEmail(email: string, reservationId: string
         pcName: safePcName,
         date: dateStr,
         time: timeStr,
-        reservationId: safeReservationId
+        reservationId: safeReservationId,
+        gameName: safeGameName
       }),
     });
     console.log("✅ Email sent successfully:", data);
@@ -89,13 +91,19 @@ export async function sendConfirmationEmail(email: string, reservationId: string
                         </td>
                       </tr>
                       <tr>
-                        <td>
+                        <td style="padding-bottom: 15px;">
                           <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">EQUIPO</div>
                           <div style="color: #fff; font-size: 18px; font-weight: bold;">${safePcName}</div>
                         </td>
-                        <td>
+                        <td style="padding-bottom: 15px;">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">JUEGO</div>
+                          <div style="color: #00f3ff; font-size: 18px; font-weight: bold;">${safeGameName}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
                           <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">ID RESERVA</div>
-                          <div style="color: #00f3ff; font-size: 18px; font-family: monospace;">#${safeReservationId.slice(0, 8)}</div>
+                          <div style="color: #666; font-size: 14px; font-family: monospace;">#${safeReservationId.slice(0, 8)}</div>
                         </td>
                       </tr>
                     </table>
