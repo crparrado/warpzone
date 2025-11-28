@@ -143,7 +143,9 @@ export default function AdminReservations() {
                                                 <Clock className="w-3 h-3 text-gray-600" /> {new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </td>
-                                        <td className="p-4 text-gray-400">1 Horas</td>
+                                        <td className="p-4 text-gray-400">
+                                            {Math.round((new Date(res.endTime).getTime() - new Date(res.startTime).getTime()) / (1000 * 60 * 60))} Horas
+                                        </td>
                                         <td className="p-4">
                                             <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded border border-green-500/30">
                                                 CONFIRMED

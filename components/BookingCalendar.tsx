@@ -236,19 +236,32 @@ export default function BookingCalendar() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3 mb-8">
-                                {timeSlots.map(time => (
-                                    <button
-                                        key={time}
-                                        onClick={() => setSelectedTime(time)}
-                                        className={`py-2 text-sm font-mono border rounded-sm transition-all
-                      ${selectedTime === time
-                                                ? 'border-neon-cyan bg-neon-cyan/20 text-white shadow-[0_0_10px_rgba(0,243,255,0.3)]'
-                                                : 'border-white/10 hover:border-white/30 text-gray-400'}
-                    `}
-                                    >
-                                        {time}
-                                    </button>
-                                ))}
+                                {timeSlots.map(time => {
+                                    const [hours, minutes] = time.split(':').map(Number);
+                                    const slotDate = new Date(selectedDate);
+                                    slotDate.setHours(hours, minutes, 0, 0);
+
+                                    // If slot is for today, check if it's in the past
+                                    const now = new Date();
+                                    const isPast = selectedDate.toDateString() === now.toDateString() && slotDate < now;
+
+                                    return (
+                                        <button
+                                            key={time}
+                                            onClick={() => !isPast && setSelectedTime(time)}
+                                            disabled={isPast}
+                                            className={`py-2 text-sm font-mono border rounded-sm transition-all
+                                                ${selectedTime === time
+                                                    ? 'border-neon-cyan bg-neon-cyan/20 text-white shadow-[0_0_10px_rgba(0,243,255,0.3)]'
+                                                    : isPast
+                                                        ? 'border-white/5 text-gray-600 cursor-not-allowed opacity-50'
+                                                        : 'border-white/10 hover:border-white/30 text-gray-400'}
+                                            `}
+                                        >
+                                            {time}
+                                        </button>
+                                    );
+                                })}
                             </div>
                             <button
                                 disabled={!selectedTime}
