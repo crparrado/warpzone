@@ -209,7 +209,71 @@ export async function sendPurchaseConfirmationEmail(email: string, userName: str
         from: 'Warpzone <pagos@warpzone.cl>',
         to: [email],
         subject: '💎 ¡Recarga Exitosa! Créditos Agregados',
-        html: `<p>Hola ${safeUserName}, tu recarga de ${productName} por $${amount} ha sido exitosa. Se han agregado ${minutes} minutos a tu cuenta.</p>`
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);">
+                
+                <!-- Header -->
+                <div style="background-color: #000; padding: 30px 0; text-align: center; border-bottom: 1px solid #333;">
+                  <h1 style="color: #00f3ff; font-size: 36px; font-weight: 900; letter-spacing: 6px; margin: 0; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);">WARPZONE</h1>
+                  <p style="color: #666; font-size: 10px; letter-spacing: 4px; margin: 5px 0 0;">REMOTE GAMING SYSTEMS</p>
+                </div>
+
+                <!-- Content -->
+                <div style="padding: 40px;">
+                  <h2 style="color: #fff; font-size: 24px; margin: 0 0 20px;">¡RECARGA EXITOSA!</h2>
+                  <h3 style="color: #fff; font-size: 20px; margin: 0 0 20px;">HOLA <span style="color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);">${safeUserName.toUpperCase()}</span>,</h3>
+                  <p style="color: #aaa; font-size: 16px; line-height: 24px; margin: 0 0 30px;">
+                    Tus créditos han sido agregados correctamente a tu cuenta. Ya estás listo para jugar.
+                  </p>
+
+                  <!-- Card -->
+                  <div style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                    <table style="width: 100%;">
+                      <tr>
+                        <td style="padding-bottom: 15px;">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">PRODUCTO</div>
+                          <div style="color: #fff; font-size: 18px; font-weight: bold;">${productName}</div>
+                        </td>
+                        <td style="padding-bottom: 15px;">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">CRÉDITOS</div>
+                          <div style="color: #00f3ff; font-size: 18px; font-weight: bold; text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);">+${minutes / 60} HRS</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom: 15px;">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">MONTO</div>
+                          <div style="color: #fff; font-size: 18px; font-weight: bold;">$${amount.toLocaleString('es-CL')}</div>
+                        </td>
+                        <td style="padding-bottom: 15px;">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">FECHA</div>
+                          <div style="color: #fff; font-size: 18px; font-weight: bold;">${dateStr}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
+                          <div style="color: #666; font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;">ID TRANSACCIÓN</div>
+                          <div style="color: #666; font-size: 14px; font-family: monospace;">#${purchaseId.slice(0, 8)}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <a href="https://warpzone.cl/dashboard" style="display: block; background-color: #ff00ff; border-radius: 4px; color: #000; font-size: 16px; font-weight: bold; text-decoration: none; text-align: center; padding: 16px 0; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);">
+                    IR AL DASHBOARD
+                  </a>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px;">
+                  WARPZONE CHILE<br />Santiago, Región Metropolitana
+                </div>
+              </div>
+            </body>
+          </html>
+        `
       });
     } catch (e) {
       console.error("Fallback failed", e);
