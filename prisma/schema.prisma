@@ -80,6 +80,7 @@ model Purchase {
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   amount    Int
+  status    String   @default("COMPLETED") // PENDING, COMPLETED, FAILED
   createdAt DateTime @default(now())
 }
 
