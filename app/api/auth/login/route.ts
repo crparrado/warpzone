@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -10,8 +11,14 @@ export async function POST(request: Request) {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Simplified password check (In production, use bcrypt/argon2)
-    if (!user || user.password !== password) {
+    if (!user || !user.password) {
+        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
+
+    // Check password with bcrypt
+    const isValid = await bcrypt.compare(password, user.password);
+
+    if (!isValid) {
         return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
 

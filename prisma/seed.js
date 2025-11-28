@@ -1,4 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
+const bcrypt = require('bcrypt')
+require('dotenv').config()
+
 const prisma = new PrismaClient()
 
 async function main() {
@@ -15,6 +18,27 @@ async function main() {
         })
     }
     console.log('Seeded 4 PCs')
+
+    // Create Admin Users
+    const admins = [
+        { email: "crparrado@gmail.com", name: "Cristobal Parrado" },
+        { email: "martongas89@gmail.com", name: "Martoz" }
+    ];
+
+    for (const admin of admins) {
+        await prisma.user.upsert({
+            where: { email: admin.email },
+            update: { role: "ADMIN" },
+            create: {
+                email: admin.email,
+                name: admin.name,
+                password: await bcrypt.hash("admin123", 10), // Default password, should be changed
+                role: "ADMIN",
+                minutes: 999999
+            }
+        });
+        console.log(`✅ Admin configured: ${admin.email}`);
+    }
 }
 
 main()
@@ -26,3 +50,4 @@ main()
         await prisma.$disconnect()
         process.exit(1)
     })
+
