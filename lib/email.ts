@@ -6,47 +6,57 @@ import ParsecEmail from '@/components/emails/ParsecEmail';
 // This global initialization is removed as per instruction to initialize inside functions.
 
 
-const resend = new Resend(apiKey);
+export async function sendConfirmationEmail(email: string, reservationId: string, startTime: Date | string, userName: string, pcName: string) {
+  console.log(`[EMAIL] Attempting to send confirmation to ${email}`);
 
-// Ensure date is a Date object
-const dateObj = new Date(startTime);
-// Fix Timezone to Chile
-const dateStr = !isNaN(dateObj.getTime())
-  ? dateObj.toLocaleDateString('es-CL', { timeZone: 'America/Santiago', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-  : "Fecha inválida";
-const timeStr = !isNaN(dateObj.getTime())
-  ? dateObj.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })
-  : "Hora inválida";
+  const apiKey = process.env.RESEND_API_KEY;
 
-// Sanitize props to prevent React rendering crashes
-const safeUserName = userName || "Gamer";
-const safePcName = pcName || "PC Gamer";
-const safeReservationId = reservationId ? String(reservationId) : "N/A";
+  if (!apiKey) {
+    console.error("⚠️ RESEND_API_KEY missing in environment variables.");
+    return;
+  }
 
-try {
-  const data = await resend.emails.send({
-    from: 'Warpzone <reservas@warpzone.cl>',
-    to: [email],
-    subject: '¡Reserva Confirmada en Warpzone! 🎮',
-    react: ReservationEmail({
-      userName: safeUserName,
-      pcName: safePcName,
-      date: dateStr,
-      time: timeStr,
-      reservationId: safeReservationId
-    }),
-  });
-  console.log("✅ Email sent successfully:", data);
-} catch (error) {
-  console.error("❌ Error sending email:", error);
-  // Fallback: Rich HTML Template matching the Cyber Gamer aesthetic
+  const resend = new Resend(apiKey);
+
+  // Ensure date is a Date object
+  const dateObj = new Date(startTime);
+  // Fix Timezone to Chile
+  const dateStr = !isNaN(dateObj.getTime())
+    ? dateObj.toLocaleDateString('es-CL', { timeZone: 'America/Santiago', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : "Fecha inválida";
+  const timeStr = !isNaN(dateObj.getTime())
+    ? dateObj.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })
+    : "Hora inválida";
+
+  // Sanitize props to prevent React rendering crashes
+  const safeUserName = userName || "Gamer";
+  const safePcName = pcName || "PC Gamer";
+  const safeReservationId = reservationId ? String(reservationId) : "N/A";
+
   try {
-    console.log("⚠️ Attempting fallback to rich HTML...");
-    await resend.emails.send({
+    const data = await resend.emails.send({
       from: 'Warpzone <reservas@warpzone.cl>',
       to: [email],
       subject: '¡Reserva Confirmada en Warpzone! 🎮',
-      html: `
+      react: ReservationEmail({
+        userName: safeUserName,
+        pcName: safePcName,
+        date: dateStr,
+        time: timeStr,
+        reservationId: safeReservationId
+      }),
+    });
+    console.log("✅ Email sent successfully:", data);
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    // Fallback: Rich HTML Template matching the Cyber Gamer aesthetic
+    try {
+      console.log("⚠️ Attempting fallback to rich HTML...");
+      await resend.emails.send({
+        from: 'Warpzone <reservas@warpzone.cl>',
+        to: [email],
+        subject: '¡Reserva Confirmada en Warpzone! 🎮',
+        html: `
           <!DOCTYPE html>
           <html>
             <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
@@ -111,12 +121,12 @@ try {
             </body>
           </html>
         `,
-    });
-    console.log("✅ Fallback email sent.");
-  } catch (fallbackError) {
-    console.error("❌ Fallback failed:", fallbackError);
+      });
+      console.log("✅ Fallback email sent.");
+    } catch (fallbackError) {
+      console.error("❌ Fallback failed:", fallbackError);
+    }
   }
-}
 }
 
 export async function sendParsecLinkEmail(email: string, parsecLink: string) {
