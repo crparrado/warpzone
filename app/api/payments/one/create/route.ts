@@ -33,7 +33,6 @@ export async function POST(req: Request) {
                 userId,
                 productId,
                 amount: product.price,
-                status: "PENDING",
             }
         });
 
@@ -88,7 +87,7 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error("Error processing One.lat payment:", error);
         console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-        return NextResponse.json({ 
+        return NextResponse.json({
             error: "Error processing payment",
             message: error instanceof Error ? error.message : String(error)
         }, { status: 500 });
