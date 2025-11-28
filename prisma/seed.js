@@ -14,26 +14,41 @@ async function main() {
         { name: 'PC 4', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc4' },
     ]
 
-    // Clean up existing PCs to prevent duplicates (keep only the 4 expected ones)
-    // This is a bit drastic but ensures we stick to the 4 defined PCs
-    const existingPCs = await prisma.pC.findMany();
-    if (existingPCs.length > 4) {
-        console.log('Found more than 4 PCs, cleaning up...');
-        await prisma.pC.deleteMany({});
-    }
+    // Fetch all existing PCs ordered by creation date (oldest first)
+    // This ensures we update the original PCs (preserving history) and delete newer duplicates
+    const existingPCs = await prisma.pC.findMany({ orderBy: { createdAt: 'asc' } });
 
-    for (const pc of pcs) {
-        // We try to find a PC by name first to update it, or create if not exists
-        // Since name might not be unique in schema, we use findFirst
-        const existing = await prisma.pC.findFirst({ where: { name: pc.name } });
+    console.log(`Found ${existingPCs.length} existing PCs.`);
 
-        if (existing) {
+    for (let i = 0; i < pcs.length; i++) {
+        const targetPC = pcs[i];
+
+        if (i < existingPCs.length) {
+            // Update existing PC (rename old PC-01 to PC 1, etc.)
+            console.log(`Updating existing PC: ${existingPCs[i].name} -> ${targetPC.name}`);
             await prisma.pC.update({
-                where: { id: existing.id },
-                data: pc
+                where: { id: existingPCs[i].id },
+                data: targetPC
             });
         } else {
-            await prisma.pC.create({ data: pc });
+            // Create new PC if we don't have enough
+            console.log(`Creating new PC: ${targetPC.name}`);
+            await prisma.pC.create({ data: targetPC });
+        }
+    }
+
+    // Delete any extra PCs (duplicates created by previous runs)
+    if (existingPCs.length > pcs.length) {
+        const toDelete = existingPCs.slice(pcs.length);
+        console.log(`Deleting ${toDelete.length} extra/duplicate PCs...`);
+        for (const pc of toDelete) {
+            try {
+                await prisma.pC.delete({ where: { id: pc.id } });
+            } catch (e) {
+                console.error(`Could not delete PC ${pc.name} (id: ${pc.id}). It might have reservations. Error: ${e.message}`);
+                // If we can't delete it, at least mark it as MAINTENANCE or rename it to avoid confusion?
+                // For now, let's just log it. In a strict cleanup we might need to delete reservations first.
+            }
         }
     }
     console.log('✅ Seeded 4 PCs (Idempotent)')
