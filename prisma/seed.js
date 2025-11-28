@@ -32,7 +32,7 @@ async function main() {
             create: {
                 email: admin.email,
                 name: admin.name,
-                password: await bcrypt.hash("admin123", 10), // Default password, should be changed
+                password: await bcrypt.hash("mono1234", 10), // Updated password
                 role: "ADMIN",
                 minutes: 999999
             }
