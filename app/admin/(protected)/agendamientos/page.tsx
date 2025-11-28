@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
-import { Calendar as CalendarIcon, List, RefreshCw, Send, Monitor, User, Clock, X } from "lucide-react";
+import { Calendar as CalendarIcon, List, RefreshCw, Send, Monitor, User, Clock, X, Gamepad2 } from "lucide-react";
 
 interface Reservation {
     id: string;
     user: { name: string; email: string };
     pc: { name: string };
+    game?: { name: string };
     startTime: string;
     endTime: string;
     status: string;
@@ -66,6 +67,7 @@ export default function AdminReservations() {
                                 <div className="font-bold text-white group-hover:text-neon-magenta">{new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                 <div className="text-gray-400 truncate">{res.user.name}</div>
                                 <div className="text-gray-500 truncate text-[10px]">{res.pc.name}</div>
+                                {res.game && <div className="text-neon-cyan truncate text-[10px] flex items-center gap-1"><Gamepad2 className="w-3 h-3" /> {res.game.name}</div>}
                             </button>
                         ))}
                         {dayReservations.length === 0 && (
@@ -117,6 +119,7 @@ export default function AdminReservations() {
                                 <tr>
                                     <th className="p-4">Usuario</th>
                                     <th className="p-4">PC</th>
+                                    <th className="p-4">Juego</th>
                                     <th className="p-4">Fecha y Hora</th>
                                     <th className="p-4">Duración</th>
                                     <th className="p-4">Estado</th>
@@ -134,6 +137,15 @@ export default function AdminReservations() {
                                             <div className="flex items-center gap-2 text-neon-magenta">
                                                 <Monitor className="w-4 h-4" /> {res.pc.name}
                                             </div>
+                                        </td>
+                                        <td className="p-4">
+                                            {res.game ? (
+                                                <div className="flex items-center gap-2 text-neon-cyan">
+                                                    <Gamepad2 className="w-4 h-4" /> {res.game.name}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-600 text-xs">-</span>
+                                            )}
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2 text-gray-300">
@@ -205,6 +217,18 @@ export default function AdminReservations() {
                                         <div className="text-white font-bold">{selectedRes.pc.name}</div>
                                     </div>
                                 </div>
+
+                                {selectedRes.game && (
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                            <Gamepad2 className="w-6 h-6 text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-gray-400 font-orbitron">JUEGO</div>
+                                            <div className="text-white font-bold">{selectedRes.game.name}</div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">

@@ -8,6 +8,7 @@ export async function GET() {
         include: {
             user: true,
             pc: true,
+            game: true, // Include game details
         },
         orderBy: { startTime: 'desc' }
     });
@@ -18,7 +19,7 @@ import { sendConfirmationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
     const body = await request.json();
-    const { userId, startTime, endTime } = body; // Removed pcId
+    const { userId, startTime, endTime, gameId } = body; // Destructure gameId here
 
     // 1. Verify user
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -41,7 +42,6 @@ export async function POST(request: Request) {
     }
 
     // 4. Check Game Availability (if game selected)
-    const { gameId } = body;
     if (gameId) {
         // Fetch game and its maxCopies limit
         const game = await prisma.game.findUnique({ where: { id: gameId } });
@@ -117,8 +117,9 @@ export async function POST(request: Request) {
                 pcId: availablePC.id,
                 startTime: start,
                 endTime: end,
+                gameId: gameId || null, // Save gameId!
             },
-            include: { pc: true }
+            include: { pc: true, game: true } // Include game in response
         });
     });
 
