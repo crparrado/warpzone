@@ -39,8 +39,7 @@ export default function AdminPCs() {
     };
 
     return (
-        <div className="min-h-screen pt-24 px-6 pb-12 flex gap-8">
-            <AdminSidebar />
+        <div>
 
             <div className="flex-1 max-w-6xl">
                 <div className="flex justify-between items-center mb-8">

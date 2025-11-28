@@ -79,8 +79,7 @@ export default function AdminReservations() {
     };
 
     return (
-        <div className="flex min-h-screen bg-black text-white font-sans selection:bg-neon-cyan selection:text-black">
-            <AdminSidebar />
+        <div>
 
             <main className="flex-1 p-8 pt-24">
                 <div className="flex justify-between items-center mb-8">

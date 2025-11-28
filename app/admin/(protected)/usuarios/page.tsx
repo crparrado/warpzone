@@ -68,8 +68,7 @@ export default function AdminUsuarios() {
     };
 
     return (
-        <div className="min-h-screen pt-24 px-4 md:px-6 pb-12 flex flex-col md:flex-row gap-8">
-            <AdminSidebar />
+        <div>
 
             <div className="flex-1 w-full overflow-hidden">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
