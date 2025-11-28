@@ -6,7 +6,10 @@ export const dynamic = 'force-dynamic';
 const prisma = new PrismaClient();
 
 export async function GET() {
-    const pcs = await prisma.pC.findMany();
+    const pcs = await prisma.pC.findMany({
+        take: 4,
+        orderBy: { name: 'asc' }
+    });
     return NextResponse.json(pcs);
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Gamepad2, Plus, Upload, Power, PowerOff } from "lucide-react";
+import { Gamepad2, Plus, Upload, Power, PowerOff, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface Game {
@@ -48,6 +48,25 @@ export default function AdminJuegos() {
             }
         } catch (error) {
             console.error("Error updating game:", error);
+        }
+    };
+
+    const handleDeleteGame = async (id: string) => {
+        if (!confirm("¿Estás seguro de que quieres eliminar este juego? Esta acción no se puede deshacer.")) return;
+
+        try {
+            const res = await fetch(`/api/games/${id}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                setGames(games.filter(g => g.id !== id));
+            } else {
+                alert("Error al eliminar el juego");
+            }
+        } catch (error) {
+            console.error("Error deleting game:", error);
+            alert("Error al eliminar el juego");
         }
     };
 
@@ -110,13 +129,20 @@ export default function AdminJuegos() {
                                 ) : (
                                     <Gamepad2 className="w-12 h-12 text-gray-600 group-hover:scale-110 transition-transform duration-500" />
                                 )}
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <button
                                         onClick={() => toggleGameStatus(game.id, game.active)}
                                         className={`p-3 rounded-full ${game.active ? 'bg-red-500 text-white' : 'bg-green-500 text-white'} hover:scale-110 transition-transform`}
                                         title={game.active ? "Deshabilitar" : "Habilitar"}
                                     >
                                         {game.active ? <PowerOff className="w-6 h-6" /> : <Power className="w-6 h-6" />}
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteGame(game.id)}
+                                        className="p-3 rounded-full bg-red-600 text-white hover:scale-110 transition-transform"
+                                        title="Eliminar"
+                                    >
+                                        <Trash2 className="w-6 h-6" />
                                     </button>
                                 </div>
                             </div>

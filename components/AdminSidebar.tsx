@@ -28,6 +28,7 @@ export default function AdminSidebar() {
         { name: "Agendamientos", href: "/admin/agendamientos", icon: Calendar },
         { name: "PCs", href: "/admin/pcs", icon: Monitor },
         { name: "Productos", href: "/admin/productos", icon: ShoppingBag },
+        { name: "Compras", href: "/admin/compras", icon: ShoppingBag },
         { name: "Juegos", href: "/admin/juegos", icon: Gamepad2 },
         { name: "Logros", href: "/admin/logros", icon: Trophy },
     ];

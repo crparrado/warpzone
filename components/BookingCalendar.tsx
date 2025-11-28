@@ -213,6 +213,27 @@ export default function BookingCalendar() {
                     ) : step === 1 ? (
                         <>
                             <h4 className="font-orbitron text-neon-cyan mb-4">HORARIOS DISPONIBLES</h4>
+
+                            {/* Duration Selector */}
+                            <div className="mb-6">
+                                <label className="block text-xs font-orbitron text-gray-400 mb-2">DURACIÓN</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map(h => (
+                                        <button
+                                            key={h}
+                                            onClick={() => setDuration(h)}
+                                            className={`flex-1 py-2 text-sm font-mono border rounded-sm transition-all
+                                                ${duration === h
+                                                    ? 'border-neon-magenta bg-neon-magenta/20 text-white'
+                                                    : 'border-white/10 hover:border-white/30 text-gray-400'}
+                                            `}
+                                        >
+                                            {h}H
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-3 gap-3 mb-8">
                                 {timeSlots.map(time => (
                                     <button
@@ -233,7 +254,7 @@ export default function BookingCalendar() {
                                 onClick={() => setStep(2)}
                                 className="mt-auto w-full py-3 bg-neon-magenta disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold font-orbitron hover:bg-white transition-colors"
                             >
-                                CONTINUAR
+                                CONTINUAR ({duration} {duration === 1 ? 'Hora' : 'Horas'})
                             </button>
                         </>
                     ) : step === 2 ? (
@@ -291,7 +312,7 @@ export default function BookingCalendar() {
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Hora:</span>
-                                        <span className="text-white">{selectedTime}</span>
+                                        <span className="text-white">{selectedTime} ({duration}h)</span>
                                     </div>
                                     <div className="flex justify-between mt-2 pt-2 border-t border-white/10">
                                         <span>Usuario:</span>
