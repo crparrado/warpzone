@@ -21,18 +21,22 @@ async function main() {
 
     // Create Admin Users
     const admins = [
-        { email: "crparrado@gmail.com", name: "Cristobal Parrado" },
-        { email: "martongas89@gmail.com", name: "Martoz" }
+        { email: "crparrado@gmail.com", name: "Cristobal Parrado", password: "mono1234" },
+        { email: "martongas89@gmail.com", name: "Martoz", password: "Draculaura123" }
     ];
 
     for (const admin of admins) {
+        const hashedPassword = await bcrypt.hash(admin.password, 10);
         await prisma.user.upsert({
             where: { email: admin.email },
-            update: { role: "ADMIN" },
+            update: {
+                role: "ADMIN",
+                password: hashedPassword
+            },
             create: {
                 email: admin.email,
                 name: admin.name,
-                password: await bcrypt.hash("mono1234", 10), // Updated password
+                password: hashedPassword,
                 role: "ADMIN",
                 minutes: 999999
             }
