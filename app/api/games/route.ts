@@ -39,7 +39,8 @@ export async function POST(req: Request) {
             data: {
                 name,
                 imageUrl,
-                active: true
+                active: true,
+                maxCopies: parseInt(formData.get("maxCopies") as string) || 1
             }
         });
 

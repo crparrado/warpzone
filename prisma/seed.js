@@ -52,11 +52,11 @@ async function main() {
             if (existingGame) {
                 await prisma.game.update({
                     where: { id: existingGame.id },
-                    data: { name, active: true }
+                    data: { name, active: true, maxCopies: 1 } // Default: 1 copy (change manually for multi-license games)
                 });
             } else {
                 await prisma.game.create({
-                    data: { name, imageUrl, active: true }
+                    data: { name, imageUrl, active: true, maxCopies: 1 } // Default: 1 copy
                 });
             }
         }

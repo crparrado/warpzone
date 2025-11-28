@@ -9,6 +9,7 @@ interface Game {
     name: string;
     imageUrl: string;
     active: boolean;
+    maxCopies: number;
 }
 
 export default function AdminJuegos() {
@@ -17,6 +18,7 @@ export default function AdminJuegos() {
     const [showModal, setShowModal] = useState(false);
     const [newGameName, setNewGameName] = useState("");
     const [newGameImage, setNewGameImage] = useState<File | null>(null);
+    const [newGameMaxCopies, setNewGameMaxCopies] = useState(1);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -77,6 +79,7 @@ export default function AdminJuegos() {
         setUploading(true);
         const formData = new FormData();
         formData.append("name", newGameName);
+        formData.append("maxCopies", newGameMaxCopies.toString());
         if (newGameImage) {
             formData.append("image", newGameImage);
         }
@@ -148,9 +151,12 @@ export default function AdminJuegos() {
                             </div>
                             <div className="p-3">
                                 <h3 className="text-white font-orbitron text-sm truncate" title={game.name}>{game.name}</h3>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <div className={`w-2 h-2 rounded-full ${game.active ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'}`}></div>
-                                    <span className="text-xs text-gray-400">{game.active ? 'Disponible' : 'Deshabilitado'}</span>
+                                <div className="flex items-center justify-between mt-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${game.active ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'}`}></div>
+                                        <span className="text-xs text-gray-400">{game.active ? 'Disponible' : 'Deshabilitado'}</span>
+                                    </div>
+                                    <span className="text-xs text-neon-cyan font-mono">{game.maxCopies} {game.maxCopies === 1 ? 'copia' : 'copias'}</span>
                                 </div>
                             </div>
                         </div>
@@ -188,6 +194,19 @@ export default function AdminJuegos() {
                                         {newGameImage ? newGameImage.name : "Click para subir imagen"}
                                     </p>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-orbitron text-gray-400 mb-1">Copias Disponibles</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    required
+                                    className="w-full bg-black/50 border border-white/10 p-3 text-white focus:border-neon-cyan outline-none"
+                                    value={newGameMaxCopies}
+                                    onChange={(e) => setNewGameMaxCopies(parseInt(e.target.value) || 1)}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Número de jugadores que pueden usar este juego simultáneamente</p>
                             </div>
                             <div className="flex gap-4 mt-8">
                                 <button

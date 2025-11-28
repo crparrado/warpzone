@@ -47,6 +47,7 @@ model Game {
   name      String
   imageUrl  String?
   active    Boolean  @default(true)
+  maxCopies Int      @default(1) // Maximum simultaneous copies/licenses available
   createdAt DateTime @default(now())
   reservations Reservation[]
 }
