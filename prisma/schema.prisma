@@ -8,15 +8,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String?  // Optional for now to support existing users or OAuth later
-  name      String?
-  role      String   @default("USER") // ADMIN, USER
-  minutes   Int      @default(0)
-  createdAt DateTime @default(now())
-  reservations Reservation[]
-  purchases Purchase[]
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  password             String?  // Optional for now to support existing users or OAuth later
+  name                 String?
+  role                 String   @default("USER") // ADMIN, USER
+  minutes              Int      @default(0)
+  totalHoursPurchased  Int      @default(0) // Total hours purchased (for leveling)
+  level                Int      @default(0) // Current level
+  achievementsUnlocked String[] @default([]) // Array of achievement IDs
+  createdAt            DateTime @default(now())
+  reservations         Reservation[]
+  purchases            Purchase[]
 }
 
 model PC {
@@ -78,4 +81,14 @@ model Purchase {
   product   Product  @relation(fields: [productId], references: [id])
   amount    Int
   createdAt DateTime @default(now())
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String   // "Novato", "Aficionado", etc.
+  description String   // "Alcanzaste 10 horas compradas"
+  milestone   Int      // 10, 25, 50, etc. (in hours)
+  reward      Int      // Bonus hours to award
+  icon        String?  // Optional icon/badge
+  createdAt   DateTime @default(now())
 }

@@ -8,6 +8,9 @@ const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 export const metadata: Metadata = {
     title: "Warpzone | Tu Portal Gamer",
     description: "La mejor tienda de videojuegos y tecnología de Chile.",
+    icons: {
+        icon: '/favicon.ico',
+    },
 };
 
 import Navbar from "@/components/Navbar";

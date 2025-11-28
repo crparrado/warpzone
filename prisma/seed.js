@@ -124,6 +124,32 @@ async function main() {
         }
     }
     console.log(`✅ Seeded ${products.length} products`);
+
+    // Seed Achievements
+    const achievements = [
+        { name: "Novato", milestone: 10, reward: 2, description: "Alcanzaste 10 horas compradas", icon: "🎮" },
+        { name: "Aficionado", milestone: 25, reward: 5, description: "Alcanzaste 25 horas compradas", icon: "🎯" },
+        { name: "Entusiasta", milestone: 50, reward: 10, description: "Alcanzaste 50 horas compradas", icon: "⚡" },
+        { name: "Dedicado", milestone: 75, reward: 15, description: "Alcanzaste 75 horas compradas", icon: "🔥" },
+        { name: "Veterano", milestone: 100, reward: 20, description: "Alcanzaste 100 horas compradas", icon: "💎" },
+        { name: "Maestro", milestone: 125, reward: 25, description: "Alcanzaste 125 horas compradas", icon: "👑" },
+        { name: "Leyenda", milestone: 150, reward: 30, description: "Alcanzaste 150 horas compradas", icon: "⭐" },
+        { name: "Titán", milestone: 175, reward: 35, description: "Alcanzaste 175 horas compradas", icon: "🏆" },
+        { name: "Dios del Gaming", milestone: 200, reward: 40, description: "Alcanzaste 200 horas compradas", icon: "👾" }
+    ];
+
+    for (const achievement of achievements) {
+        const existing = await prisma.achievement.findFirst({ where: { milestone: achievement.milestone } });
+        if (existing) {
+            await prisma.achievement.update({
+                where: { id: existing.id },
+                data: achievement
+            });
+        } else {
+            await prisma.achievement.create({ data: achievement });
+        }
+    }
+    console.log(`✅ Seeded ${achievements.length} achievements`);
 }
 
 main()
