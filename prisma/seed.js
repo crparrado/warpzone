@@ -12,12 +12,29 @@ async function main() {
         { name: 'PC-04 (RTX 3070)', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc4' },
     ]
 
-    for (const pc of pcs) {
-        await prisma.pC.create({
-            data: pc,
-        })
+    // Clean up existing PCs to prevent duplicates (keep only the 4 expected ones)
+    // This is a bit drastic but ensures we stick to the 4 defined PCs
+    const existingPCs = await prisma.pC.findMany();
+    if (existingPCs.length > 4) {
+        console.log('Found more than 4 PCs, cleaning up...');
+        await prisma.pC.deleteMany({});
     }
-    console.log('Seeded 4 PCs')
+
+    for (const pc of pcs) {
+        // We try to find a PC by name first to update it, or create if not exists
+        // Since name might not be unique in schema, we use findFirst
+        const existing = await prisma.pC.findFirst({ where: { name: pc.name } });
+
+        if (existing) {
+            await prisma.pC.update({
+                where: { id: existing.id },
+                data: pc
+            });
+        } else {
+            await prisma.pC.create({ data: pc });
+        }
+    }
+    console.log('✅ Seeded 4 PCs (Idempotent)')
 
     // Create Admin Users
     const admins = [
