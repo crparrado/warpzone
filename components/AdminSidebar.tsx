@@ -33,7 +33,7 @@ export default function AdminSidebar() {
     ];
 
     return (
-        <aside className="w-64 h-screen bg-black/90 border-r border-white/10 flex flex-col fixed left-0 top-0 z-40">
+        <aside className="w-64 h-full bg-black/90 border-r border-white/10 flex flex-col flex-shrink-0">
             <div className="p-6 border-b border-white/10">
                 <h2 className="text-xl font-orbitron font-bold text-gray-400">ADMINISTRACIÓN</h2>
                 {user && (
