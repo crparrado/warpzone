@@ -11,7 +11,7 @@ interface PC {
     status: string;
 }
 
-interface User {
+interface BookingUser {
     id: string;
     email: string;
     name: string;
@@ -31,7 +31,7 @@ export default function BookingCalendar() {
     const [duration, setDuration] = useState<number>(1);
     const [pcs, setPcs] = useState<PC[]>([]);
     const [selectedPC, setSelectedPC] = useState<string | null>(null);
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<BookingUser | null>(null);
     const [step, setStep] = useState(1); // 1: Date/Time, 2: Confirm, 3: Success
     const [loading, setLoading] = useState(false);
 
