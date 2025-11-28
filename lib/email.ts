@@ -124,7 +124,7 @@ export async function sendConfirmationEmail(email: string, reservationId: string
 
                 <!-- Footer -->
                 <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px;">
-                  WARPZONE CHILE<br />Santiago, Región Metropolitana
+                  WARPZONE CHILE<br />Santiago de Chile
                 </div>
               </div>
             </body>
@@ -268,7 +268,7 @@ export async function sendPurchaseConfirmationEmail(email: string, userName: str
 
                 <!-- Footer -->
                 <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px;">
-                  WARPZONE CHILE<br />Santiago, Región Metropolitana
+                  WARPZONE CHILE<br />Santiago de Chile
                 </div>
               </div>
             </body>

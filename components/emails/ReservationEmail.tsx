@@ -103,7 +103,7 @@ export const ReservationEmail = ({
 
                 <Text style={footer}>
                     WARPZONE CHILE<br />
-                    Santiago, Región Metropolitana
+                    Santiago de Chile
                 </Text>
             </Container>
         </Body>

@@ -20,7 +20,7 @@ export default function Contacto() {
                             </div>
                             <div>
                                 <h3 className="font-orbitron font-bold text-lg">Ubicación</h3>
-                                <p className="text-gray-400">Av. Providencia 1234, Local 56, Santiago</p>
+                                <p className="text-gray-400">Santiago de Chile</p>
                             </div>
                         </div>
 
@@ -30,7 +30,7 @@ export default function Contacto() {
                             </div>
                             <div>
                                 <h3 className="font-orbitron font-bold text-lg">Teléfono</h3>
-                                <p className="text-gray-400">+56 9 1234 5678</p>
+                                <p className="text-gray-400">+56984647819</p>
                             </div>
                         </div>
 

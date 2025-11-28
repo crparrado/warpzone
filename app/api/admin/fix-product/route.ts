@@ -24,26 +24,27 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: "No product found with name '1 HORA'" });
         }
 
-        const productToDelete = products[0]; // Take the first match
+        const productIds = products.map(p => p.id);
 
-        // 2. Delete associated purchases
+        // 2. Delete associated purchases for ALL found products
         const deletePurchases = await prisma.purchase.deleteMany({
             where: {
-                productId: productToDelete.id
+                productId: { in: productIds }
             }
         });
 
-        // 3. Delete the product
-        const deleteProduct = await prisma.product.delete({
+        // 3. Delete ALL found products
+        const deleteProducts = await prisma.product.deleteMany({
             where: {
-                id: productToDelete.id
+                id: { in: productIds }
             }
         });
 
         return NextResponse.json({
             success: true,
-            deletedProduct: deleteProduct,
-            deletedPurchasesCount: deletePurchases.count
+            deletedProductsCount: deleteProducts.count,
+            deletedPurchasesCount: deletePurchases.count,
+            productsFound: products.map(p => p.name)
         });
 
     } catch (error) {
