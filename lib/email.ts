@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import ReservationEmail from '@/components/emails/ReservationEmail';
+import ParsecEmail from '@/components/emails/ParsecEmail';
 
 // Initialize Resend with API Key (we need to add this to .env)
 // This global initialization is removed as per instruction to initialize inside functions.
@@ -64,20 +65,22 @@ export async function sendParsecLinkEmail(email: string, parsecLink: string) {
       from: 'Warpzone <reservas@warpzone.cl>',
       to: [email],
       subject: '🎮 Tu Link de Acceso Warpzone',
-      html: `
-                <div style="background:#000; color:#fff; padding:40px; font-family:sans-serif;">
-                    <h1 style="color:#00f3ff;">¡HORA DE JUGAR!</h1>
-                    <p>Tu sesión está por comenzar.</p>
-                    <div style="background:#111; padding:20px; border:1px solid #333; margin:20px 0;">
-                        <p style="margin:0; color:#888;">LINK DE CONEXIÓN:</p>
-                        <a href="${parsecLink}" style="color:#ff00ff; font-size:18px; font-weight:bold;">${parsecLink}</a>
-                    </div>
-                    <p>Abre Parsec y pega este link en la sección "Arcade" o "Computers".</p>
-                </div>
-            `
+      react: ParsecEmail({ parsecLink }),
     });
+    console.log(`✅ Parsec link email sent to ${email}`);
   } catch (error) {
     console.error("Error sending Parsec link:", error);
+    // Fallback
+    try {
+      await resend.emails.send({
+        from: 'Warpzone <reservas@warpzone.cl>',
+        to: [email],
+        subject: '🎮 Tu Link de Acceso Warpzone',
+        html: `<p>Tu link de conexión: <a href="${parsecLink}">${parsecLink}</a></p>`
+      });
+    } catch (e) {
+      console.error("Fallback failed", e);
+    }
   }
 }
 

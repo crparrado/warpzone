@@ -1,5 +1,6 @@
 import { Clock, CreditCard, Calendar } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
+import BuyCredits from "@/components/BuyCredits";
 
 export default function Reservas() {
     return (
@@ -23,24 +24,7 @@ export default function Reservas() {
                             <h2 className="text-2xl font-orbitron font-bold">COMPRA FICHAS</h2>
                         </div>
 
-                        <div className="grid gap-6">
-                            {[
-                                { hours: 1, price: "$2.000", label: "Partida Rápida" },
-                                { hours: 3, price: "$5.000", label: "Tarde de Gaming", popular: true },
-                                { hours: 5, price: "$8.000", label: "Maratón" },
-                            ].map((plan, i) => (
-                                <div key={i} className={`glass p-6 flex justify-between items-center cursor-pointer hover:border-neon-cyan transition-all ${plan.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}`}>
-                                    <div>
-                                        <h3 className="text-xl font-bold font-orbitron text-white">{plan.hours} HORA{plan.hours > 1 ? 'S' : ''}</h3>
-                                        <p className="text-sm text-gray-400">{plan.label}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-bold text-neon-cyan">{plan.price}</p>
-                                        <button className="text-xs text-white underline hover:text-neon-magenta">COMPRAR</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <BuyCredits />
                     </div>
 
                     {/* Step 2: Book Slot */}
