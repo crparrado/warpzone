@@ -40,6 +40,7 @@ export default function Navbar() {
             <div className="hidden md:flex gap-8 text-sm font-medium text-gray-300 font-orbitron items-center">
                 <Link href="/" className="hover:text-neon-cyan transition-colors">INICIO</Link>
                 <Link href="/reservas" className="hover:text-neon-cyan transition-colors text-neon-magenta">RESERVAS</Link>
+                <Link href="/logros" className="hover:text-neon-cyan transition-colors">LOGROS</Link>
                 <Link href="/fichas-y-pases" className="text-sm font-bold hover:text-neon-cyan transition-colors tracking-widest">FICHAS Y PASES</Link>
                 <Link href="/servicios" className="text-sm font-bold hover:text-neon-cyan transition-colors tracking-widest">SERVICIOS</Link>
                 <Link href="/contacto" className="text-sm font-bold hover:text-neon-cyan transition-colors tracking-widest">CONTACTO</Link>
