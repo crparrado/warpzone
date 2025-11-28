@@ -8,10 +8,10 @@ const prisma = new PrismaClient()
 
 async function main() {
     const pcs = [
-        { name: 'PC-01 (RTX 4060)', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc1' },
-        { name: 'PC-02 (RTX 4060)', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc2' },
-        { name: 'PC-03 (RTX 3070)', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc3' },
-        { name: 'PC-04 (RTX 3070)', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc4' },
+        { name: 'PC 1', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc1' },
+        { name: 'PC 2', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc2' },
+        { name: 'PC 3', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc3' },
+        { name: 'PC 4', status: 'AVAILABLE', parsecLink: 'https://parsec.gg/link/pc4' },
     ]
 
     // Clean up existing PCs to prevent duplicates (keep only the 4 expected ones)
