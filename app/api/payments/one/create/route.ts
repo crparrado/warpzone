@@ -33,6 +33,7 @@ export async function POST(req: Request) {
                 userId,
                 productId,
                 amount: product.price,
+                status: "PENDING",
             }
         });
 
@@ -52,9 +53,8 @@ export async function POST(req: Request) {
             title: `Warpzone: ${product.name}`,
             type: "PAYMENT",
             custom_urls: {
-                // TODO: Update these URLs for production
-                success_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?payment=success`,
-                error_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/fichas-y-pases?payment=error`
+                success_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/dashboard?payment=success`,
+                error_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/fichas-y-pases?payment=error`
             },
             payer: {
                 email: user.email,
@@ -63,15 +63,14 @@ export async function POST(req: Request) {
         };
 
         console.log("One.lat request payload:", JSON.stringify(payload, null, 2));
-        console.log("One.lat API Key present:", !!apiKey);
-        console.log("One.lat API Secret present:", !!apiSecret);
 
         const response = await fetch("https://api.one.lat/v1/checkout_preferences", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "x-api-key": apiKey,
-                "x-api-secret": apiSecret
+                "x-api-secret": apiSecret,
+                "User-Agent": "Warpzone/1.0"
             },
             body: JSON.stringify(payload)
         });
