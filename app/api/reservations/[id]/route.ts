@@ -32,11 +32,13 @@ export async function DELETE(
   const durationMinutes = Math.floor(durationMs / (1000 * 60));
 
   await prisma.$transaction(async (tx) => {
-    // Refund minutes
+    // Refund minutes (DISABLED BY ADMIN REQUEST)
+    /*
     await tx.user.update({
       where: { id: user.id },
       data: { minutes: { increment: durationMinutes } }
     });
+    */
 
     // Delete reservation
     await tx.reservation.delete({
