@@ -39,7 +39,7 @@ export default function DynamicHeroText() {
                         position: "absolute"
                     }}
                     transition={{
-                        duration: 0.5,
+                        duration: 0.2,
                         ease: "easeInOut"
                     }}
                     className="block text-white"
