@@ -31,7 +31,7 @@ export default function BookingCalendar() {
     const [duration, setDuration] = useState<number>(1);
     const [pcs, setPcs] = useState<PC[]>([]);
     const [selectedPC, setSelectedPC] = useState<string | null>(null);
-    const [user, setUser] = useState<{ id: string, minutes: number } | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [step, setStep] = useState(1); // 1: Date/Time, 2: Confirm, 3: Success
     const [loading, setLoading] = useState(false);
 
