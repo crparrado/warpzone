@@ -85,8 +85,30 @@ async function main() {
                 minutes: 999999
             }
         });
-        console.log(`✅ Admin configured: ${admin.email}`);
     }
+    console.log('✅ Admin configured: crparrado@gmail.com');
+
+    // Seed Products
+    const products = [
+        { name: "1 HORA", price: 2000, minutes: 60, type: "Ficha", description: "Partida Rápida", popular: false },
+        { name: "3 HORAS", price: 5000, minutes: 180, type: "Pase", description: "Tarde de Gaming", popular: false },
+        { name: "5 HORAS", price: 8000, minutes: 300, type: "Pase", description: "Maratón", popular: true },
+        { name: "DAY PASS", price: 15000, minutes: 720, type: "Pase", description: "Todo el día (12hrs)", popular: false },
+        { name: "NIGHT PASS", price: 12000, minutes: 480, type: "Pase", description: "Toda la noche (8hrs)", popular: false }
+    ];
+
+    for (const product of products) {
+        const existingProduct = await prisma.product.findFirst({ where: { name: product.name } });
+        if (existingProduct) {
+            await prisma.product.update({
+                where: { id: existingProduct.id },
+                data: product
+            });
+        } else {
+            await prisma.product.create({ data: product });
+        }
+    }
+    console.log(`✅ Seeded ${products.length} products`);
 }
 
 main()
