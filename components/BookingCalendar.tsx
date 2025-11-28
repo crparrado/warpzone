@@ -32,7 +32,7 @@ export default function BookingCalendar() {
     const [pcs, setPcs] = useState<PC[]>([]);
     const [selectedPC, setSelectedPC] = useState<string | null>(null);
     const [user, setUser] = useState<BookingUser | null>(null);
-    const [step, setStep] = useState(1); // 1: Date/Time, 2: Confirm, 3: Success
+    const [step, setStep] = useState(1); // 1: Date/Time, 2: PC, 3: Confirm, 4: Success
     const [loading, setLoading] = useState(false);
 
     // Game Selection State
@@ -106,7 +106,7 @@ export default function BookingCalendar() {
             });
 
             if (res.ok) {
-                setStep(3);
+                setStep(4);
             } else {
                 const data = await res.json();
                 alert(data.error || "Error al reservar. Intenta nuevamente.");
@@ -158,7 +158,7 @@ export default function BookingCalendar() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
-    if (step === 3) {
+    if (step === 4) {
         return (
             <div className="glass p-12 text-center border border-neon-cyan/30">
                 <div className="w-20 h-20 bg-neon-cyan/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -170,7 +170,7 @@ export default function BookingCalendar() {
                     Recibirás tu link de conexión 5 minutos antes de la hora.
                 </p>
                 <button
-                    onClick={() => { setStep(1); setSelectedDate(new Date()); setSelectedTime(null); }}
+                    onClick={() => { setStep(1); setSelectedDate(new Date()); setSelectedTime(null); setSelectedPC(null); }}
                     className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-orbitron rounded-sm transition-colors"
                 >
                     HACER OTRA RESERVA
@@ -236,6 +236,49 @@ export default function BookingCalendar() {
                                 CONTINUAR
                             </button>
                         </>
+                    ) : step === 2 ? (
+                        <div className="flex flex-col h-full">
+                            <h4 className="font-orbitron text-neon-cyan mb-6">SELECCIONA TU PC</h4>
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                {pcs.map(pc => (
+                                    <button
+                                        key={pc.id}
+                                        onClick={() => setSelectedPC(pc.id)}
+                                        className={`p-4 border rounded-lg transition-all text-left group relative overflow-hidden
+                                            ${selectedPC === pc.id
+                                                ? 'border-neon-cyan bg-neon-cyan/10 shadow-[0_0_15px_rgba(0,243,255,0.3)]'
+                                                : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
+                                        `}
+                                    >
+                                        <div className="font-orbitron font-bold text-white mb-1">{pc.name}</div>
+                                        <div className="text-xs text-gray-400 flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${pc.status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                            {pc.status === 'available' ? 'Disponible' : 'Ocupado'}
+                                        </div>
+                                        {selectedPC === pc.id && (
+                                            <div className="absolute top-2 right-2 text-neon-cyan">
+                                                <CheckCircle className="w-5 h-5" />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="mt-auto flex gap-4">
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="flex-1 py-3 border border-white/10 text-gray-400 font-orbitron hover:bg-white/5"
+                                >
+                                    VOLVER
+                                </button>
+                                <button
+                                    disabled={!selectedPC}
+                                    onClick={() => setStep(3)}
+                                    className="flex-1 py-3 bg-neon-magenta disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold font-orbitron hover:bg-white transition-colors"
+                                >
+                                    CONTINUAR
+                                </button>
+                            </div>
+                        </div>
                     ) : (
                         <div className="flex flex-col h-full">
                             <h4 className="font-orbitron text-neon-cyan mb-6">CONFIRMAR RESERVA</h4>
@@ -268,7 +311,7 @@ export default function BookingCalendar() {
 
                             <div className="mt-auto flex gap-4">
                                 <button
-                                    onClick={() => setStep(1)}
+                                    onClick={() => setStep(2)}
                                     className="flex-1 py-3 border border-white/10 text-gray-400 font-orbitron hover:bg-white/5"
                                 >
                                     VOLVER
