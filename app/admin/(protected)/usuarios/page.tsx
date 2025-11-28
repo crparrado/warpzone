@@ -117,7 +117,7 @@ export default function AdminUsuarios() {
                                             onClick={() => openCreditModal(user)}
                                             className="text-neon-cyan hover:text-white transition-colors text-xs font-bold border border-neon-cyan/30 px-2 py-1 rounded hover:bg-neon-cyan/10"
                                         >
-                                            + CARGAR
+                                            GESTIONAR
                                         </button>
                                     </td>
                                 </tr>
@@ -148,7 +148,7 @@ export default function AdminUsuarios() {
                                     onClick={() => openCreditModal(user)}
                                     className="bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30 px-3 py-2 rounded text-sm font-bold hover:bg-neon-cyan hover:text-black transition-colors"
                                 >
-                                    + CARGAR HORAS
+                                    GESTIONAR HORAS
                                 </button>
                             </div>
                         </div>
@@ -223,33 +223,59 @@ export default function AdminUsuarios() {
             {showCreditModal && selectedUser && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
                     <div className="glass p-6 md:p-8 w-full max-w-md border border-white/10">
-                        <h2 className="text-xl font-orbitron font-bold text-white mb-2">Cargar Horas</h2>
+                        <h2 className="text-xl font-orbitron font-bold text-white mb-2">Gestionar Horas</h2>
                         <p className="text-gray-400 text-sm mb-6">Usuario: <span className="text-neon-cyan">{selectedUser.name}</span></p>
 
                         <form onSubmit={handleAddCredits} className="space-y-6">
                             <div>
-                                <label className="block text-xs font-orbitron text-gray-400 mb-2">CANTIDAD (MINUTOS)</label>
-                                <div className="flex gap-2 mb-2">
-                                    {[60, 180, 300].map(mins => (
-                                        <button
-                                            key={mins}
-                                            type="button"
-                                            onClick={() => setCreditAmount(mins)}
-                                            className={`flex-1 py-2 text-xs font-bold border ${creditAmount === mins ? 'bg-neon-cyan text-black border-neon-cyan' : 'border-white/10 text-gray-400 hover:border-white/30'}`}
-                                        >
-                                            {mins / 60} hrs
-                                        </button>
-                                    ))}
+                                <label className="block text-xs font-orbitron text-gray-400 mb-2">GESTIONAR CRÉDITOS (MINUTOS)</label>
+
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    {/* Add Credits */}
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-green-400 font-bold text-center">AGREGAR</p>
+                                        <div className="flex flex-col gap-2">
+                                            {[60, 180, 300].map(mins => (
+                                                <button
+                                                    key={`add-${mins}`}
+                                                    type="button"
+                                                    onClick={() => setCreditAmount(mins)}
+                                                    className={`py-2 text-xs font-bold border transition-colors ${creditAmount === mins ? 'bg-green-500 text-black border-green-500' : 'border-green-500/30 text-green-400 hover:bg-green-500/10'}`}
+                                                >
+                                                    +{mins / 60} hrs
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Subtract Credits */}
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-red-400 font-bold text-center">RESTAR</p>
+                                        <div className="flex flex-col gap-2">
+                                            {[-60, -180, -300].map(mins => (
+                                                <button
+                                                    key={`sub-${mins}`}
+                                                    type="button"
+                                                    onClick={() => setCreditAmount(mins)}
+                                                    className={`py-2 text-xs font-bold border transition-colors ${creditAmount === mins ? 'bg-red-500 text-black border-red-500' : 'border-red-500/30 text-red-400 hover:bg-red-500/10'}`}
+                                                >
+                                                    {mins / 60} hrs
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <label className="block text-xs font-orbitron text-gray-400 mb-2">VALOR MANUAL</label>
                                 <input
                                     type="number"
                                     required
-                                    className="w-full bg-black/50 border border-white/10 p-3 text-white focus:border-neon-cyan outline-none text-center font-orbitron text-xl"
+                                    className={`w-full bg-black/50 border p-3 text-white outline-none text-center font-orbitron text-xl ${creditAmount >= 0 ? 'border-green-500/50 focus:border-green-500' : 'border-red-500/50 focus:border-red-500'}`}
                                     value={creditAmount}
                                     onChange={(e) => setCreditAmount(parseInt(e.target.value) || 0)}
                                 />
                                 <p className="text-xs text-gray-500 mt-2 text-center">
-                                    Ingresa un valor negativo para restar minutos.
+                                    Valor positivo suma, valor negativo resta.
                                 </p>
                             </div>
 
