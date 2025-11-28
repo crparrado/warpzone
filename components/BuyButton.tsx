@@ -69,7 +69,8 @@ export default function BuyButton({ product }: { product: Product }) {
                     window.location.href = data.checkoutUrl;
                 } else {
                     console.error("One.lat error:", data);
-                    alert("Error al iniciar el pago con One.lat");
+                    const errorMessage = data.details ? JSON.stringify(data.details) : (data.error || "Error desconocido");
+                    alert(`Error al iniciar el pago con One.lat: ${errorMessage}`);
                     setLoading(false);
                 }
             }

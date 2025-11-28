@@ -76,7 +76,10 @@ export async function POST(req: Request) {
         if (!response.ok) {
             const errorData = await response.json();
             console.error("One.lat error:", errorData);
-            return NextResponse.json({ error: "Error creating payment preference" }, { status: 500 });
+            return NextResponse.json({
+                error: "Error creating payment preference",
+                details: errorData
+            }, { status: 500 });
         }
 
         const data = await response.json();
