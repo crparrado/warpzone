@@ -137,7 +137,7 @@ export async function sendConfirmationEmail(email: string, reservationId: string
   }
 }
 
-export async function sendParsecLinkEmail(email: string, parsecLink: string) {
+export async function sendParsecLinkEmail(email: string, parsecLink: string, userName?: string, gameName?: string) {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
@@ -152,7 +152,7 @@ export async function sendParsecLinkEmail(email: string, parsecLink: string) {
       from: 'Warpzone <reservas@warpzone.cl>',
       to: [email],
       subject: '🎮 Tu Link de Acceso Warpzone',
-      react: ParsecEmail({ parsecLink }),
+      react: ParsecEmail({ parsecLink, userName, gameName }),
     });
     console.log(`✅ Parsec link email sent to ${email}`);
   } catch (error) {

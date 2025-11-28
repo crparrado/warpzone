@@ -15,10 +15,14 @@ import {
 
 interface ParsecEmailProps {
     parsecLink: string;
+    userName?: string;
+    gameName?: string;
 }
 
 export const ParsecEmail = ({
     parsecLink,
+    userName,
+    gameName,
 }: ParsecEmailProps) => (
     <Html>
         <Head />
@@ -34,8 +38,9 @@ export const ParsecEmail = ({
                 {/* Main Content */}
                 <Section style={contentSection}>
                     <Heading style={title}>¡HORA DE JUGAR!</Heading>
+                    <Text style={greeting}>HOLA <span style={neonText}>{userName ? userName.toUpperCase() : 'GAMER'}</span>,</Text>
                     <Text style={paragraph}>
-                        Tu sesión ha comenzado. Conéctate a tu PC Gamer de alto rendimiento ahora mismo.
+                        Tu sesión {gameName ? `de ${gameName} ` : ''}está a punto de comenzar. Conéctate a tu PC Gamer ahora mismo.
                     </Text>
 
                     {/* Link Box */}
@@ -116,6 +121,18 @@ const title = {
     fontWeight: 'bold',
     margin: '0 0 20px',
     textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+};
+
+const greeting = {
+    color: '#fff',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    margin: '0 0 20px',
+};
+
+const neonText = {
+    color: '#ff00ff',
+    textShadow: '0 0 5px rgba(255, 0, 255, 0.5)',
 };
 
 const paragraph = {

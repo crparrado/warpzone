@@ -42,6 +42,7 @@ model Reservation {
   status    String   @default("CONFIRMED") // CONFIRMED, CANCELLED
   gameId    String?
   game      Game?    @relation(fields: [gameId], references: [id])
+  linkSent  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
