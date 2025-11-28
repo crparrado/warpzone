@@ -98,6 +98,7 @@ export default function BookingCalendar() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    userId: user.id,
                     pcId: selectedPC,
                     startTime: startTime.toISOString(),
                     endTime: endTime.toISOString(),
