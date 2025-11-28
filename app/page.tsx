@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Globe, Users, MonitorPlay, CalendarClock } from "lucide-react";
+import DynamicHeroText from "@/components/DynamicHeroText";
 
 export default function Home() {
     return (
@@ -14,7 +15,10 @@ export default function Home() {
                         CYBER GAMER DEL FUTURO
                     </h2>
                     <h1 className="text-5xl md:text-8xl font-orbitron font-black mb-6 tracking-tighter text-white leading-tight">
-                        JUEGA EN <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">ULTRA</span><br />
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+                            <DynamicHeroText />
+                            <span>EN <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">ULTRA</span></span>
+                        </div>
                         DESDE CUALQUIER LUGAR
                     </h1>
 
@@ -119,6 +123,6 @@ export default function Home() {
                 </div>
             </section>
 
-        </main>
+        </main >
     );
 }
