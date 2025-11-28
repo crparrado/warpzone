@@ -18,46 +18,71 @@ import { sendConfirmationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
     const body = await request.json();
-    const { userId, pcId, startTime, endTime, email } = body;
+    const { userId, startTime, endTime } = body; // Removed pcId
 
-    // Verify user exists and has credits
+    // 1. Verify user
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
         return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
-    // Calculate duration in minutes
+    // 2. Calculate duration
     const start = new Date(startTime);
     const end = new Date(endTime);
     const durationMs = end.getTime() - start.getTime();
     const durationMinutes = Math.floor(durationMs / (1000 * 60));
 
-    console.log(`[RESERVATION] User: ${user.email}, Credits: ${user.minutes}, Cost: ${durationMinutes}`);
-
-    if (durationMinutes <= 0) {
-        return NextResponse.json({ error: "Duración inválida" }, { status: 400 });
-    }
-
+    // 3. Check credits
+    if (durationMinutes <= 0) return NextResponse.json({ error: "Duración inválida" }, { status: 400 });
     if (user.minutes < durationMinutes) {
-        console.log(`[RESERVATION] Insufficient funds. Required: ${durationMinutes}, Available: ${user.minutes}`);
         return NextResponse.json({
             error: `Saldo insuficiente. Necesitas ${durationMinutes} minutos, tienes ${user.minutes}.`
         }, { status: 400 });
     }
 
-    // Create Reservation and Deduct Minutes in Transaction
+    // 4. Find Available PC (Strict Logic)
+    // Fetch all PCs
+    const allPCs = await prisma.pC.findMany({
+        where: { status: "AVAILABLE" }, // Only active PCs
+        orderBy: { name: 'asc' } // Prefer PC 01, then 02...
+    });
+
+    // Fetch conflicting reservations
+    const conflictingReservations = await prisma.reservation.findMany({
+        where: {
+            OR: [
+                {
+                    startTime: { lt: end },
+                    endTime: { gt: start }
+                }
+            ],
+            status: { not: "CANCELLED" }
+        },
+        select: { pcId: true }
+    });
+
+    const occupiedPCIds = new Set(conflictingReservations.map(r => r.pcId));
+
+    // Find first PC that is NOT in occupied set
+    const availablePC = allPCs.find(pc => !occupiedPCIds.has(pc.id));
+
+    if (!availablePC) {
+        return NextResponse.json({
+            error: "Lo sentimos, no hay PCs disponibles para este horario. Intenta otra hora."
+        }, { status: 409 }); // 409 Conflict
+    }
+
+    // 5. Create Reservation & Deduct Credits
     const reservation = await prisma.$transaction(async (tx) => {
-        // Deduct minutes
         await tx.user.update({
             where: { id: userId },
             data: { minutes: { decrement: durationMinutes } }
         });
 
-        // Create reservation
         return await tx.reservation.create({
             data: {
                 userId,
-                pcId,
+                pcId: availablePC.id,
                 startTime: start,
                 endTime: end,
             },
@@ -65,7 +90,7 @@ export async function POST(request: Request) {
         });
     });
 
-    // Send Confirmation Email
+    // 6. Send Email
     await sendConfirmationEmail(
         user.email,
         reservation.id,

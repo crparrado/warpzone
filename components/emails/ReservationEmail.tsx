@@ -10,6 +10,9 @@ import {
     Text,
     Button,
     Hr,
+    Column,
+    Row,
+    Img,
 } from '@react-email/components';
 
 interface ReservationEmailProps {
@@ -29,114 +32,223 @@ export const ReservationEmail = ({
 }: ReservationEmailProps) => (
     <Html>
         <Head />
-        <Preview>¡Tu reserva en Warpzone está confirmada!</Preview>
+        <Preview>¡Reserva Confirmada! 🎮 Acceso Warpzone</Preview>
         <Body style={main}>
             <Container style={container}>
-                <Heading style={h1}>WARPZONE</Heading>
-                <Text style={text}>Hola <span style={highlight}>{userName}</span>,</Text>
-                <Text style={text}>
-                    Tu reserva ha sido confirmada exitosamente. Prepárate para la mejor experiencia de gaming remoto.
-                </Text>
-
-                <Section style={box}>
-                    <Text style={paragraph}><strong>ID Reserva:</strong> {reservationId}</Text>
-                    <Text style={paragraph}><strong>PC:</strong> {pcName}</Text>
-                    <Text style={paragraph}><strong>Fecha:</strong> {date}</Text>
-                    <Text style={paragraph}><strong>Hora:</strong> {time}</Text>
+                {/* Header Logo Area */}
+                <Section style={headerSection}>
+                    <Heading style={logoText}>WARPZONE</Heading>
+                    <Text style={subLogoText}>REMOTE GAMING SYSTEMS</Text>
                 </Section>
 
-                <Text style={text}>
-                    Recibirás un nuevo correo 5 minutos antes de tu hora con el link de conexión a <strong>Parsec</strong>.
-                </Text>
+                {/* Main Content */}
+                <Section style={contentSection}>
+                    <Text style={greeting}>HOLA <span style={neonText}>{userName.toUpperCase()}</span>,</Text>
+                    <Text style={paragraph}>
+                        Tu estación de batalla ha sido reservada. El sistema está preparando tu acceso.
+                    </Text>
 
-                <Button style={button} href="https://warpzone.cl/dashboard">
-                    Ver en Mi Cuenta
-                </Button>
+                    {/* Reservation Details Card */}
+                    <Section style={card}>
+                        <Row style={cardRow}>
+                            <Column>
+                                <Text style={label}>FECHA</Text>
+                                <Text style={value}>{date}</Text>
+                            </Column>
+                            <Column>
+                                <Text style={label}>HORA</Text>
+                                <Text style={value}>{time}</Text>
+                            </Column>
+                        </Row>
+                        <Row style={cardRow}>
+                            <Column>
+                                <Text style={label}>EQUIPO</Text>
+                                <Text style={value}>{pcName}</Text>
+                            </Column>
+                            <Column>
+                                <Text style={label}>ID RESERVA</Text>
+                                <Text style={valueId}>#{reservationId.slice(0, 8)}</Text>
+                            </Column>
+                        </Row>
+                    </Section>
+
+                    {/* Instructions */}
+                    <Section style={instructionsBox}>
+                        <Text style={instructionTitle}>⚠️ INSTRUCCIONES DE ACCESO</Text>
+                        <Text style={instructionText}>
+                            1. Recibirás un correo con el <strong>Link de Parsec</strong> 5 minutos antes de tu hora.
+                        </Text>
+                        <Text style={instructionText}>
+                            2. Asegúrate de tener <a href="https://parsec.app/" style={link}>Parsec instalado</a>.
+                        </Text>
+                        <Text style={instructionText}>
+                            3. Si tienes problemas, contacta a soporte en Discord.
+                        </Text>
+                    </Section>
+
+                    <Button style={button} href="https://warpzone.cl/dashboard">
+                        GESTIONAR MI RESERVA
+                    </Button>
+                </Section>
 
                 <Hr style={hr} />
+
                 <Text style={footer}>
-                    Warpzone Remote Gaming Systems<br />
-                    Santiago, Chile
+                    WARPZONE CHILE<br />
+                    Santiago, Región Metropolitana
                 </Text>
             </Container>
         </Body>
     </Html>
 );
 
+// Styles
 const main = {
-    backgroundColor: '#000000',
-    fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    backgroundColor: '#050505',
+    fontFamily: '"Segoe UI", "Roboto", "Helvetica", sans-serif',
     padding: '40px 0',
 };
 
 const container = {
-    backgroundColor: '#111111',
+    backgroundColor: '#0a0a0a',
     border: '1px solid #333',
-    borderRadius: '8px',
-    padding: '40px',
+    borderRadius: '12px',
+    overflow: 'hidden',
     maxWidth: '600px',
     margin: '0 auto',
+    boxShadow: '0 0 20px rgba(0, 243, 255, 0.1)',
 };
 
-const h1 = {
-    color: '#00f3ff', // Neon Cyan
-    fontSize: '32px',
-    fontWeight: 'bold',
+const headerSection = {
+    backgroundColor: '#000',
+    padding: '30px 0',
     textAlign: 'center' as const,
-    margin: '0 0 30px',
+    borderBottom: '1px solid #333',
+};
+
+const logoText = {
+    color: '#00f3ff',
+    fontSize: '36px',
+    fontWeight: '900',
+    letterSpacing: '6px',
+    margin: '0',
+    textShadow: '0 0 10px rgba(0, 243, 255, 0.5)',
+};
+
+const subLogoText = {
+    color: '#666',
+    fontSize: '10px',
     letterSpacing: '4px',
+    margin: '5px 0 0',
 };
 
-const text = {
-    color: '#cccccc',
-    fontSize: '16px',
-    lineHeight: '24px',
-    textAlign: 'left' as const,
+const contentSection = {
+    padding: '40px',
 };
 
-const highlight = {
-    color: '#ff00ff', // Neon Magenta
+const greeting = {
+    color: '#fff',
+    fontSize: '24px',
     fontWeight: 'bold',
+    margin: '0 0 20px',
 };
 
-const box = {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid #333',
-    borderRadius: '4px',
-    padding: '20px',
-    margin: '20px 0',
+const neonText = {
+    color: '#ff00ff',
+    textShadow: '0 0 5px rgba(255, 0, 255, 0.5)',
 };
 
 const paragraph = {
-    color: '#ffffff',
-    fontSize: '14px',
+    color: '#aaa',
+    fontSize: '16px',
     lineHeight: '24px',
+    margin: '0 0 30px',
+};
+
+const card = {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    border: '1px solid #333',
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '30px',
+};
+
+const cardRow = {
+    marginBottom: '15px',
+};
+
+const label = {
+    color: '#666',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    letterSpacing: '1px',
+    marginBottom: '5px',
+};
+
+const value = {
+    color: '#fff',
+    fontSize: '18px',
+    fontWeight: 'bold',
+};
+
+const valueId = {
+    color: '#00f3ff',
+    fontSize: '18px',
+    fontFamily: 'monospace',
+};
+
+const instructionsBox = {
+    backgroundColor: 'rgba(0, 243, 255, 0.05)',
+    borderLeft: '4px solid #00f3ff',
+    padding: '20px',
+    marginBottom: '30px',
+};
+
+const instructionTitle = {
+    color: '#00f3ff',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    marginBottom: '10px',
+};
+
+const instructionText = {
+    color: '#ccc',
+    fontSize: '14px',
     margin: '5px 0',
 };
 
+const link = {
+    color: '#00f3ff',
+    textDecoration: 'underline',
+};
+
 const button = {
-    backgroundColor: '#00f3ff',
+    backgroundColor: '#ff00ff',
     borderRadius: '4px',
-    color: '#000000',
+    color: '#000',
     fontSize: '16px',
     fontWeight: 'bold',
     textDecoration: 'none',
     textAlign: 'center' as const,
     display: 'block',
     width: '100%',
-    padding: '12px',
-    marginTop: '30px',
+    padding: '16px 0',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '1px',
+    boxShadow: '0 0 15px rgba(255, 0, 255, 0.3)',
 };
 
 const hr = {
-    borderColor: '#333',
-    margin: '30px 0',
+    borderColor: '#222',
+    margin: '0',
 };
 
 const footer = {
-    color: '#666666',
+    backgroundColor: '#000',
+    color: '#444',
     fontSize: '12px',
     textAlign: 'center' as const,
+    padding: '20px',
 };
 
 export default ReservationEmail;

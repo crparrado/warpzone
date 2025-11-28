@@ -66,9 +66,9 @@ export default function BookingCalendar() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    userId: user.id, // Use logged in user ID
+                    userId: user.id,
                     email: user.email,
-                    pcId: randomPC?.id,
+                    // pcId is now auto-assigned by backend
                     startTime: startTime.toISOString(),
                     endTime: endTime.toISOString()
                 }),
@@ -77,7 +77,8 @@ export default function BookingCalendar() {
             if (res.ok) {
                 setStep(3);
             } else {
-                alert("Error al reservar. Intenta nuevamente.");
+                const data = await res.json();
+                alert(data.error || "Error al reservar. Intenta nuevamente.");
             }
         } catch (error) {
             console.error(error);
