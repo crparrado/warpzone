@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
-import { Save, DollarSign, Loader2, Plus, Tag } from "lucide-react";
+import { Save, DollarSign, Loader2, Plus, Tag, Trash2 } from "lucide-react";
 
 interface Product {
     id: string;
@@ -123,6 +123,27 @@ export default function AdminProducts() {
         }
     };
 
+    const handleDeleteProduct = async (id: string, name: string) => {
+        if (!confirm(`¿Estás seguro de que quieres eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
+
+        try {
+            const res = await fetch("/api/products", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id }),
+            });
+
+            if (res.ok) {
+                setProducts(products.filter(p => p.id !== id));
+            } else {
+                alert("Error al eliminar el producto");
+            }
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            alert("Error al eliminar el producto");
+        }
+    };
+
     return (
         <div>
             <div className="flex justify-between items-center mb-8">
@@ -209,6 +230,12 @@ export default function AdminProducts() {
                                     </div>
                                 )}
                             </div>
+                            <button
+                                onClick={() => handleDeleteProduct(product.id, product.name)}
+                                className="mt-4 w-full py-2 bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2 text-sm font-orbitron"
+                            >
+                                <Trash2 className="w-4 h-4" /> ELIMINAR PRODUCTO
+                            </button>
                         </div>
                     ))}
                 </div>

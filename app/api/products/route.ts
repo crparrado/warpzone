@@ -56,3 +56,19 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: "Error updating product" }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const body = await req.json();
+        const { id } = body;
+
+        await prisma.product.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        return NextResponse.json({ error: "Error deleting product" }, { status: 500 });
+    }
+}
