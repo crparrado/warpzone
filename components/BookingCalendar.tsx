@@ -21,7 +21,7 @@ interface BookingUser {
 interface Game {
     id: string;
     name: string;
-    imageUrl: string;
+    imageUrl?: string;
 }
 
 export default function BookingCalendar() {
@@ -302,22 +302,32 @@ export default function BookingCalendar() {
                                                 <div className="animate-in fade-in zoom-in-95 duration-300">
                                                     {loadingGames ? (
                                                         <div className="text-center py-8 text-gray-400">Cargando juegos...</div>
+                                                    ) : games.length === 0 ? (
+                                                        <div className="text-center py-8 text-gray-500 italic">No hay juegos disponibles por el momento.</div>
                                                     ) : (
                                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                                             {games.map((game) => (
                                                                 <div
                                                                     key={game.id}
                                                                     onClick={() => setSelectedGame(game.id)}
-                                                                    className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedGame === game.id ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,243,255,0.5)] scale-105' : 'border-transparent hover:border-white/30'}`}
+                                                                    className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer border-2 transition-all group ${selectedGame === game.id ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,243,255,0.5)] scale-105' : 'border-transparent hover:border-white/30'}`}
                                                                 >
-                                                                    <img
-                                                                        src={game.imageUrl}
-                                                                        alt={game.name}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-2">
+                                                                    {game.imageUrl ? (
+                                                                        <img
+                                                                            src={game.imageUrl}
+                                                                            alt={game.name}
+                                                                            className="w-full h-full object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center p-4 text-center">
+                                                                            <span className="text-4xl mb-2">🎮</span>
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className={`absolute inset-0 flex items-end p-2 transition-opacity ${game.imageUrl ? 'bg-gradient-to-t from-black/90 via-transparent to-transparent' : 'bg-black/20'}`}>
                                                                         <span className="text-xs font-bold text-white font-orbitron truncate w-full text-center">{game.name}</span>
                                                                     </div>
+
                                                                     {selectedGame === game.id && (
                                                                         <div className="absolute top-2 right-2 bg-neon-cyan text-black rounded-full p-1">
                                                                             <Check className="w-3 h-3" />

@@ -53,12 +53,14 @@ export default function AdminJuegos() {
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newGameImage || !newGameName) return;
+        if (!newGameName) return;
 
         setUploading(true);
         const formData = new FormData();
         formData.append("name", newGameName);
-        formData.append("image", newGameImage);
+        if (newGameImage) {
+            formData.append("image", newGameImage);
+        }
 
         try {
             const res = await fetch("/api/games", {
@@ -97,13 +99,17 @@ export default function AdminJuegos() {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     {games.map((game) => (
                         <div key={game.id} className={`glass rounded-lg overflow-hidden border transition-all ${game.active ? 'border-white/10' : 'border-red-500/30 opacity-60'}`}>
-                            <div className="relative aspect-[3/4] group">
-                                <Image
-                                    src={game.imageUrl}
-                                    alt={game.name}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
+                            <div className="relative aspect-[3/4] group bg-gray-900 flex items-center justify-center">
+                                {game.imageUrl ? (
+                                    <Image
+                                        src={game.imageUrl}
+                                        alt={game.name}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <Gamepad2 className="w-12 h-12 text-gray-600 group-hover:scale-110 transition-transform duration-500" />
+                                )}
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <button
                                         onClick={() => toggleGameStatus(game.id, game.active)}
@@ -143,12 +149,11 @@ export default function AdminJuegos() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-orbitron text-gray-400 mb-1">Imagen (Cover)</label>
+                                <label className="block text-xs font-orbitron text-gray-400 mb-1">Imagen (Opcional)</label>
                                 <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-neon-cyan/50 transition-colors cursor-pointer relative">
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        required
                                         className="absolute inset-0 opacity-0 cursor-pointer"
                                         onChange={(e) => setNewGameImage(e.target.files?.[0] || null)}
                                     />

@@ -17,23 +17,28 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
-        const file = formData.get("image") as File;
         const name = formData.get("name") as string;
+        const file = formData.get("image") as File | null;
 
-        if (!file || !name) {
-            return NextResponse.json({ error: "Missing file or name" }, { status: 400 });
+        if (!name) {
+            return NextResponse.json({ error: "Missing name" }, { status: 400 });
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = file.name.replace(/\s+/g, "_");
-        const publicPath = path.join(process.cwd(), "public/games", filename);
+        let imageUrl = null;
 
-        await writeFile(publicPath, buffer);
+        if (file && file.size > 0) {
+            const buffer = Buffer.from(await file.arrayBuffer());
+            const filename = file.name.replace(/\s+/g, "_");
+            const publicPath = path.join(process.cwd(), "public/games", filename);
+
+            await writeFile(publicPath, buffer);
+            imageUrl = `/games/${filename}`;
+        }
 
         const game = await prisma.game.create({
             data: {
                 name,
-                imageUrl: `/games/${filename}`,
+                imageUrl,
                 active: true
             }
         });

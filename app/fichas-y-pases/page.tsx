@@ -6,19 +6,20 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
-async function getProducts() {
+async function getData() {
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { price: 'asc' }
-    });
-    return products;
+    const [products, settings] = await Promise.all([
+      prisma.product.findMany({ orderBy: { price: 'asc' } }),
+      prisma.systemSettings.findFirst()
+    ]);
+    return { products, discount: settings?.generalDiscount || 0 };
   } catch (error) {
-    return [];
+    return { products: [], discount: 0 };
   }
 }
 
 export default async function FichasYPases() {
-  const products = await getProducts();
+  const { products, discount } = await getData();
 
   // Helper to get icon based on type/name (since we can't store functions in DB)
   const getIcon = (name: string, type: string) => {
@@ -37,16 +38,28 @@ export default async function FichasYPases() {
           <p className="text-gray-400 max-w-2xl mx-auto">
             Adquiere tiempo de juego y accede a nuestros equipos de alto rendimiento.
           </p>
+          {discount > 0 && (
+            <div className="mt-4 inline-block bg-neon-magenta text-black font-bold px-4 py-2 rounded-full animate-pulse">
+              ¡{discount}% DE DESCUENTO EN TODO! 🔥
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => {
+          {products.map((product: any) => {
             const Icon = getIcon(product.name, product.type);
+            const discountedPrice = Math.round(product.price * (1 - discount / 100));
+
             return (
               <div key={product.id} className={`group glass p-8 relative overflow-hidden hover:border-neon-cyan transition-all duration-300 flex flex-col ${product.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}`}>
                 {product.popular && (
                   <div className="absolute top-0 right-0 bg-neon-cyan text-black text-xs font-bold px-3 py-1 font-orbitron">
                     POPULAR
+                  </div>
+                )}
+                {discount > 0 && (
+                  <div className="absolute top-0 left-0 bg-neon-magenta text-black text-xs font-bold px-3 py-1 font-orbitron">
+                    -{discount}%
                   </div>
                 )}
 
@@ -59,8 +72,15 @@ export default async function FichasYPases() {
                 </div>
 
                 <div className="mt-auto">
-                  <div className="text-3xl font-bold text-white mb-6">${product.price.toLocaleString('es-CL')}</div>
-                  <BuyButton product={product} />
+                  {discount > 0 ? (
+                    <div className="mb-6">
+                      <div className="text-gray-500 line-through text-lg">${product.price.toLocaleString('es-CL')}</div>
+                      <div className="text-3xl font-bold text-neon-magenta">${discountedPrice.toLocaleString('es-CL')}</div>
+                    </div>
+                  ) : (
+                    <div className="text-3xl font-bold text-white mb-6">${product.price.toLocaleString('es-CL')}</div>
+                  )}
+                  <BuyButton product={{ ...product, price: discount > 0 ? discountedPrice : product.price }} />
                 </div>
               </div>
             );
