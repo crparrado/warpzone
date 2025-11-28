@@ -54,9 +54,9 @@ export async function POST(req: Request) {
             type: "PAYMENT",
             custom_urls: {
                 success_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/dashboard?payment=success`,
-                error_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/fichas-y-pases?payment=error`
+                error_payment_redirect: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/fichas-y-pases?payment=error`,
+                status_changes_webhook: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/api/payments/one/webhook`
             },
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl'}/api/payments/one/webhook`,
             payer: {
                 email: user.email,
                 name: user.name || "Gamer",
