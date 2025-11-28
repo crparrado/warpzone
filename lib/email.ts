@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import ReservationEmail from '@/components/emails/ReservationEmail';
 import ParsecEmail from '@/components/emails/ParsecEmail';
+import PurchaseEmail from '@/components/emails/PurchaseEmail';
 
 // Initialize Resend with API Key (we need to add this to .env)
 // This global initialization is removed as per instruction to initialize inside functions.
@@ -171,3 +172,47 @@ export async function sendParsecLinkEmail(email: string, parsecLink: string, use
   }
 }
 
+export async function sendPurchaseConfirmationEmail(email: string, userName: string, productName: string, amount: number, minutes: number, purchaseId: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.error("⚠️ RESEND_API_KEY missing in environment variables for purchase email.");
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+  const dateStr = new Date().toLocaleDateString('es-CL', { timeZone: 'America/Santiago', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Sanitize
+  const safeUserName = userName || "Gamer";
+
+  try {
+    await resend.emails.send({
+      from: 'Warpzone <pagos@warpzone.cl>',
+      to: [email],
+      subject: '💎 ¡Recarga Exitosa! Créditos Agregados',
+      react: PurchaseEmail({
+        userName: safeUserName,
+        productName,
+        amount,
+        minutes,
+        purchaseId,
+        date: dateStr
+      }),
+    });
+    console.log(`✅ Purchase confirmation email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending purchase email:", error);
+    // Fallback
+    try {
+      await resend.emails.send({
+        from: 'Warpzone <pagos@warpzone.cl>',
+        to: [email],
+        subject: '💎 ¡Recarga Exitosa! Créditos Agregados',
+        html: `<p>Hola ${safeUserName}, tu recarga de ${productName} por $${amount} ha sido exitosa. Se han agregado ${minutes} minutos a tu cuenta.</p>`
+      });
+    } catch (e) {
+      console.error("Fallback failed", e);
+    }
+  }
+}
