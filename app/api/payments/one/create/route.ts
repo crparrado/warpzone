@@ -62,6 +62,10 @@ export async function POST(req: Request) {
             }
         };
 
+        console.log("One.lat request payload:", JSON.stringify(payload, null, 2));
+        console.log("One.lat API Key present:", !!apiKey);
+        console.log("One.lat API Secret present:", !!apiSecret);
+
         const response = await fetch("https://api.one.lat/v1/checkout_preferences", {
             method: "POST",
             headers: {
@@ -72,8 +76,19 @@ export async function POST(req: Request) {
             body: JSON.stringify(payload)
         });
 
+        console.log("One.lat response status:", response.status);
+        console.log("One.lat response headers:", Object.fromEntries(response.headers.entries()));
+
+        const responseText = await response.text();
+        console.log("One.lat response body:", responseText.substring(0, 500));
+
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorData;
+            try {
+                errorData = JSON.parse(responseText);
+            } catch {
+                errorData = { message: responseText };
+            }
             console.error("One.lat error:", errorData);
             return NextResponse.json({
                 error: "Error creating payment preference",
@@ -81,7 +96,7 @@ export async function POST(req: Request) {
             }, { status: 500 });
         }
 
-        const data = await response.json();
+        const data = JSON.parse(responseText);
         return NextResponse.json({ checkoutUrl: data.checkout_url });
 
     } catch (error) {
