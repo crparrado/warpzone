@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import ReservationEmail from '@/components/emails/ReservationEmail';
 import ParsecEmail from '@/components/emails/ParsecEmail';
-import PurchaseEmail from '@/components/emails/PurchaseEmail';
+import { PurchaseEmail } from '@/components/emails/PurchaseEmail';
 
 // Initialize Resend with API Key (we need to add this to .env)
 // This global initialization is removed as per instruction to initialize inside functions.
