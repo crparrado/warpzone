@@ -7,19 +7,53 @@ export async function POST(req: Request) {
         const body = await req.json();
         console.log("One.lat Webhook received:", body);
 
-        // One.lat sends status, external_id, etc.
-        // Format might vary, but usually: { status: 'PAID', external_id: '...', ... }
+        // Handle the event-based webhook structure
+        // Payload example: { event_type: 'PAYMENT_ORDER.CLOSED', payment_order_id: '...' }
 
-        const { status, external_id } = body;
+        let purchaseId = body.external_id;
+        let paymentStatus = body.status;
 
-        if (status === "PAID" || status === "COMPLETED") {
+        // If it's an event, we need to fetch the order details
+        if (body.event_type === "PAYMENT_ORDER.CLOSED" || body.payment_order_id) {
+            const paymentOrderId = body.payment_order_id || body.entity_id;
+
+            if (paymentOrderId) {
+                console.log(`Fetching details for order ${paymentOrderId}...`);
+                const apiKey = process.env.ONE_API_KEY;
+                const apiSecret = process.env.ONE_API_SECRET;
+
+                const orderRes = await fetch(`https://api.one.lat/v1/payment_orders/${paymentOrderId}`, {
+                    headers: {
+                        "x-api-key": apiKey!,
+                        "x-api-secret": apiSecret!
+                    }
+                });
+
+                if (orderRes.ok) {
+                    const orderData = await orderRes.json();
+                    console.log("Order details fetched:", JSON.stringify(orderData, null, 2));
+
+                    purchaseId = orderData.external_id;
+                    paymentStatus = orderData.status; // e.g. 'PAID', 'CLOSED'
+                } else {
+                    console.error("Failed to fetch order details from One.lat");
+                }
+            }
+        }
+
+        if (paymentStatus === "PAID" || paymentStatus === "COMPLETED" || paymentStatus === "CLOSED") { // 'CLOSED' often means paid in One.lat
+            if (!purchaseId) {
+                console.error("No purchase ID found in webhook data");
+                return NextResponse.json({ error: "No external_id found" }, { status: 400 });
+            }
+
             const purchase = await prisma.purchase.findUnique({
-                where: { id: external_id },
+                where: { id: purchaseId },
                 include: { user: true, product: true }
             });
 
             if (!purchase) {
-                console.error(`Purchase not found for external_id: ${external_id}`);
+                console.error(`Purchase not found for external_id: ${purchaseId}`);
                 return NextResponse.json({ error: "Purchase not found" }, { status: 404 });
             }
 
