@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DynamicHeroText() {
-    const words = ["JUEGA", "TRABAJA", "EDITA", "DISEÑA", "SIMULA"];
+    const words = ["JUEGA", "EDITA", "DISEÑA", "SIMULA"];
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
