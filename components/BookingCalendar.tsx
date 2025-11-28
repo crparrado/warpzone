@@ -318,16 +318,11 @@ export default function BookingCalendar() {
                                 </button>
                                 {/* Game Selection Step */}
                                 {selectedPC && (
-                                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                                        <h3 className="text-neon-cyan font-orbitron font-bold mb-4 flex items-center gap-2">
-                                            <span className="bg-neon-cyan text-black w-6 h-6 rounded-full flex items-center justify-center text-xs">4</span>
-                                            ¿QUIERES JUGAR ALGO ESPECÍFICO?
-                                        </h3>
-
-                                        <div className="glass p-6 rounded-lg border border-white/10">
-                                            <label className="flex items-center gap-3 cursor-pointer mb-6">
-                                                <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-colors ${wantGame ? 'bg-neon-cyan border-neon-cyan' : 'border-gray-500'}`}>
-                                                    {wantGame && <Check className="w-4 h-4 text-black" />}
+                                    <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                                        <div className="glass p-4 rounded-lg border border-white/10">
+                                            <label className="flex items-center gap-3 cursor-pointer mb-4">
+                                                <div className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-colors ${wantGame ? 'bg-neon-cyan border-neon-cyan' : 'border-gray-500'}`}>
+                                                    {wantGame && <Check className="w-3 h-3 text-black" />}
                                                 </div>
                                                 <input
                                                     type="checkbox"
@@ -338,47 +333,28 @@ export default function BookingCalendar() {
                                                         if (!e.target.checked) setSelectedGame(null);
                                                     }}
                                                 />
-                                                <span className="text-gray-300 font-orbitron">Sí, quiero reservar un juego instalado</span>
+                                                <span className="text-gray-300 font-orbitron text-sm">¿Quieres jugar algo específico?</span>
                                             </label>
 
                                             {wantGame && (
                                                 <div className="animate-in fade-in zoom-in-95 duration-300">
                                                     {loadingGames ? (
-                                                        <div className="text-center py-8 text-gray-400">Cargando juegos...</div>
+                                                        <div className="text-center py-2 text-gray-400 text-sm">Cargando juegos...</div>
                                                     ) : games.length === 0 ? (
-                                                        <div className="text-center py-8 text-gray-500 italic">No hay juegos disponibles por el momento.</div>
+                                                        <div className="text-center py-2 text-gray-500 italic text-sm">No hay juegos disponibles.</div>
                                                     ) : (
-                                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                                        <select
+                                                            value={selectedGame || ""}
+                                                            onChange={(e) => setSelectedGame(e.target.value)}
+                                                            className="w-full bg-black/50 border border-white/20 rounded p-2 text-white font-orbitron text-sm focus:border-neon-cyan focus:outline-none"
+                                                        >
+                                                            <option value="" disabled>Selecciona un juego</option>
                                                             {games.map((game) => (
-                                                                <div
-                                                                    key={game.id}
-                                                                    onClick={() => setSelectedGame(game.id)}
-                                                                    className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer border-2 transition-all group ${selectedGame === game.id ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,243,255,0.5)] scale-105' : 'border-transparent hover:border-white/30'}`}
-                                                                >
-                                                                    {game.imageUrl ? (
-                                                                        <img
-                                                                            src={game.imageUrl}
-                                                                            alt={game.name}
-                                                                            className="w-full h-full object-cover"
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center p-4 text-center">
-                                                                            <span className="text-4xl mb-2">🎮</span>
-                                                                        </div>
-                                                                    )}
-
-                                                                    <div className={`absolute inset-0 flex items-end p-2 transition-opacity ${game.imageUrl ? 'bg-gradient-to-t from-black/90 via-transparent to-transparent' : 'bg-black/20'}`}>
-                                                                        <span className="text-xs font-bold text-white font-orbitron truncate w-full text-center">{game.name}</span>
-                                                                    </div>
-
-                                                                    {selectedGame === game.id && (
-                                                                        <div className="absolute top-2 right-2 bg-neon-cyan text-black rounded-full p-1">
-                                                                            <Check className="w-3 h-3" />
-                                                                        </div>
-                                                                    )}
-                                                                </div>
+                                                                <option key={game.id} value={game.id} className="bg-gray-900">
+                                                                    {game.name}
+                                                                </option>
                                                             ))}
-                                                        </div>
+                                                        </select>
                                                     )}
                                                 </div>
                                             )}
