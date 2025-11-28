@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             }
 
             if (purchase.status === "COMPLETED") {
-                console.log(`Purchase ${external_id} already completed.`);
+                console.log(`Purchase ${purchaseId} already completed.`);
                 return NextResponse.json({ message: "Already processed" });
             }
 
