@@ -15,57 +15,47 @@ export async function sendConfirmationEmail(email: string, reservationId: string
     return;
   }
 
-  export async function sendConfirmationEmail(email: string, reservationId: string, startTime: Date | string, userName: string, pcName: string) {
-    console.log(`[EMAIL] Attempting to send confirmation to ${email}`);
+  const resend = new Resend(apiKey);
 
-    const apiKey = process.env.RESEND_API_KEY;
+  // Ensure date is a Date object
+  const dateObj = new Date(startTime);
+  // Fix Timezone to Chile
+  const dateStr = !isNaN(dateObj.getTime())
+    ? dateObj.toLocaleDateString('es-CL', { timeZone: 'America/Santiago', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : "Fecha inválida";
+  const timeStr = !isNaN(dateObj.getTime())
+    ? dateObj.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })
+    : "Hora inválida";
 
-    if (!apiKey) {
-      console.error("⚠️ RESEND_API_KEY missing in environment variables.");
-      return;
-    }
+  // Sanitize props to prevent React rendering crashes
+  const safeUserName = userName || "Gamer";
+  const safePcName = pcName || "PC Gamer";
+  const safeReservationId = reservationId ? String(reservationId) : "N/A";
 
-    const resend = new Resend(apiKey);
-
-    // Ensure date is a Date object
-    const dateObj = new Date(startTime);
-    // Fix Timezone to Chile
-    const dateStr = !isNaN(dateObj.getTime())
-      ? dateObj.toLocaleDateString('es-CL', { timeZone: 'America/Santiago', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-      : "Fecha inválida";
-    const timeStr = !isNaN(dateObj.getTime())
-      ? dateObj.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })
-      : "Hora inválida";
-
-    // Sanitize props to prevent React rendering crashes
-    const safeUserName = userName || "Gamer";
-    const safePcName = pcName || "PC Gamer";
-    const safeReservationId = reservationId ? String(reservationId) : "N/A";
-
+  try {
+    const data = await resend.emails.send({
+      from: 'Warpzone <reservas@warpzone.cl>',
+      to: [email],
+      subject: '¡Reserva Confirmada en Warpzone! 🎮',
+      react: ReservationEmail({
+        userName: safeUserName,
+        pcName: safePcName,
+        date: dateStr,
+        time: timeStr,
+        reservationId: safeReservationId
+      }),
+    });
+    console.log("✅ Email sent successfully:", data);
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    // Fallback: Rich HTML Template matching the Cyber Gamer aesthetic
     try {
-      const data = await resend.emails.send({
+      console.log("⚠️ Attempting fallback to rich HTML...");
+      await resend.emails.send({
         from: 'Warpzone <reservas@warpzone.cl>',
         to: [email],
         subject: '¡Reserva Confirmada en Warpzone! 🎮',
-        react: ReservationEmail({
-          userName: safeUserName,
-          pcName: safePcName,
-          date: dateStr,
-          time: timeStr,
-          reservationId: safeReservationId
-        }),
-      });
-      console.log("✅ Email sent successfully:", data);
-    } catch (error) {
-      console.error("❌ Error sending email:", error);
-      // Fallback: Rich HTML Template matching the Cyber Gamer aesthetic
-      try {
-        console.log("⚠️ Attempting fallback to rich HTML...");
-        await resend.emails.send({
-          from: 'Warpzone <reservas@warpzone.cl>',
-          to: [email],
-          subject: '¡Reserva Confirmada en Warpzone! 🎮',
-          html: `
+        html: `
           <!DOCTYPE html>
           <html>
             <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
@@ -130,45 +120,45 @@ export async function sendConfirmationEmail(email: string, reservationId: string
             </body>
           </html>
         `,
-        });
-        console.log("✅ Fallback email sent.");
-      } catch (fallbackError) {
-        console.error("❌ Fallback failed:", fallbackError);
-      }
+      });
+      console.log("✅ Fallback email sent.");
+    } catch (fallbackError) {
+      console.error("❌ Fallback failed:", fallbackError);
     }
   }
+}
 
-  export async function sendParsecLinkEmail(email: string, parsecLink: string) {
-    const apiKey = process.env.RESEND_API_KEY;
+export async function sendParsecLinkEmail(email: string, parsecLink: string) {
+  const apiKey = process.env.RESEND_API_KEY;
 
-    if (!apiKey) {
-      console.error("⚠️ RESEND_API_KEY missing in environment variables for Parsec link email.");
-      return;
-    }
+  if (!apiKey) {
+    console.error("⚠️ RESEND_API_KEY missing in environment variables for Parsec link email.");
+    return;
+  }
 
-    const resend = new Resend(apiKey);
+  const resend = new Resend(apiKey);
 
+  try {
+    await resend.emails.send({
+      from: 'Warpzone <reservas@warpzone.cl>',
+      to: [email],
+      subject: '🎮 Tu Link de Acceso Warpzone',
+      react: ParsecEmail({ parsecLink }),
+    });
+    console.log(`✅ Parsec link email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending Parsec link:", error);
+    // Fallback
     try {
       await resend.emails.send({
         from: 'Warpzone <reservas@warpzone.cl>',
         to: [email],
         subject: '🎮 Tu Link de Acceso Warpzone',
-        react: ParsecEmail({ parsecLink }),
+        html: `<p>Tu link de conexión: <a href="${parsecLink}">${parsecLink}</a></p>`
       });
-      console.log(`✅ Parsec link email sent to ${email}`);
-    } catch (error) {
-      console.error("Error sending Parsec link:", error);
-      // Fallback
-      try {
-        await resend.emails.send({
-          from: 'Warpzone <reservas@warpzone.cl>',
-          to: [email],
-          subject: '🎮 Tu Link de Acceso Warpzone',
-          html: `<p>Tu link de conexión: <a href="${parsecLink}">${parsecLink}</a></p>`
-        });
-      } catch (e) {
-        console.error("Fallback failed", e);
-      }
+    } catch (e) {
+      console.error("Fallback failed", e);
     }
   }
+}
 
