@@ -15,11 +15,11 @@ export async function GET() {
 
 export async function PUT(request: Request) {
     const body = await request.json();
-    const { id, parsecLink, status } = body;
+    const { id, name, parsecLink, status } = body;
 
     const updatedPC = await prisma.pC.update({
         where: { id },
-        data: { parsecLink, status },
+        data: { name, parsecLink, status },
     });
 
     return NextResponse.json(updatedPC);

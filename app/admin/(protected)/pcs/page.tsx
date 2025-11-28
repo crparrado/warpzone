@@ -28,11 +28,11 @@ export default function AdminPCs() {
         setLoading(false);
     };
 
-    const handleUpdate = async (id: string, parsecLink: string, status: string) => {
+    const handleUpdate = async (id: string, name: string, parsecLink: string, status: string) => {
         await fetch("/api/pcs", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, parsecLink, status }),
+            body: JSON.stringify({ id, name, parsecLink, status }),
         });
         alert("PC Actualizado");
         fetchPCs();
@@ -56,8 +56,14 @@ export default function AdminPCs() {
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${pc.status === 'AVAILABLE' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                                     <Monitor className="w-6 h-6" />
                                 </div>
-                                <div>
-                                    <h3 className="font-orbitron font-bold text-white">{pc.name}</h3>
+                                <div className="flex-1">
+                                    <label className="text-xs text-gray-500 font-orbitron mb-1 block">NOMBRE</label>
+                                    <input
+                                        type="text"
+                                        defaultValue={pc.name}
+                                        id={`name-${pc.id}`}
+                                        className="w-full bg-black/50 border border-white/10 p-2 text-sm text-white focus:border-neon-cyan outline-none font-orbitron"
+                                    />
                                     <span className="text-xs text-gray-400">{pc.id.slice(0, 8)}...</span>
                                 </div>
                             </div>
@@ -85,9 +91,10 @@ export default function AdminPCs() {
 
                                 <button
                                     onClick={() => {
+                                        const nameInput = document.getElementById(`name-${pc.id}`) as HTMLInputElement;
                                         const linkInput = document.getElementById(`link-${pc.id}`) as HTMLInputElement;
                                         const statusInput = document.getElementById(`status-${pc.id}`) as HTMLSelectElement;
-                                        handleUpdate(pc.id, linkInput.value, statusInput.value);
+                                        handleUpdate(pc.id, nameInput.value, linkInput.value, statusInput.value);
                                     }}
                                     className="px-6 py-2 bg-neon-cyan text-black font-bold font-orbitron hover:bg-white transition-colors flex items-center gap-2"
                                 >
