@@ -38,13 +38,12 @@ export async function GET() {
             if (pcs[i]) {
                 await prisma.pC.update({
                     where: { id: pcs[i].id },
-                    data: { name: target.shortName, specs: "RTX 4060" } // Using shortName as requested
+                    data: { name: target.shortName }
                 });
             } else {
                 await prisma.pC.create({
                     data: {
                         name: target.shortName,
-                        specs: "RTX 4060",
                         status: "AVAILABLE"
                     }
                 });
