@@ -1,29 +1,45 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Clock, CheckCircle, RefreshCw, LogIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, CheckCircle, RefreshCw, LogIn, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface PC {
     id: string;
     name: string;
+    status: string;
 }
 
 interface User {
     id: string;
     email: string;
     name: string;
+    minutes: number;
+}
+
+interface Game {
+    id: string;
+    name: string;
+    imageUrl: string;
 }
 
 export default function BookingCalendar() {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [duration, setDuration] = useState<number>(1);
     const [pcs, setPcs] = useState<PC[]>([]);
-    const [user, setUser] = useState<User | null>(null);
+    const [selectedPC, setSelectedPC] = useState<string | null>(null);
+    const [user, setUser] = useState<{ id: string, minutes: number } | null>(null);
     const [step, setStep] = useState(1); // 1: Date/Time, 2: Confirm, 3: Success
     const [loading, setLoading] = useState(false);
+
+    // Game Selection State
+    const [wantGame, setWantGame] = useState(false);
+    const [games, setGames] = useState<Game[]>([]);
+    const [selectedGame, setSelectedGame] = useState<string | null>(null);
+    const [loadingGames, setLoadingGames] = useState(false);
     const router = useRouter();
 
     // Mock time slots
@@ -40,37 +56,52 @@ export default function BookingCalendar() {
         fetch("/api/auth/me").then(res => res.json()).then(data => setUser(data));
     }, []);
 
+    useEffect(() => {
+        if (wantGame && games.length === 0) {
+            setLoadingGames(true);
+            fetch("/api/games")
+                .then(res => res.json())
+                .then(data => setGames(data.filter((g: any) => g.active)))
+                .catch(err => console.error(err))
+                .finally(() => setLoadingGames(false));
+        }
+    }, [wantGame]);
+
     const handleDateClick = (day: number) => {
         const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         setSelectedDate(newDate);
         setSelectedTime(null);
     };
 
-    const handleConfirm = async () => {
-        if (!selectedDate || !selectedTime || !user) return;
+    const handleBooking = async () => {
+        if (!selectedTime || !selectedPC || !user) return;
+
+        // Calculate total minutes needed
+        const totalMinutes = duration * 60;
+
+        if (user.minutes < totalMinutes) {
+            alert("No tienes suficientes minutos disponibles.");
+            return;
+        }
+
         setLoading(true);
-
-        // Calculate start and end time
-        const [hours, minutes] = selectedTime.split(':');
-        const startTime = new Date(selectedDate);
-        startTime.setHours(parseInt(hours), parseInt(minutes));
-
-        const endTime = new Date(startTime);
-        endTime.setHours(startTime.getHours() + 1); // Default 1 hour duration
-
-        // Pick a random available PC (Simplified logic)
-        const randomPC = pcs[0];
-
         try {
+            // Create date object from selected date and time
+            const [hours, minutes] = selectedTime.split(':').map(Number);
+            const startTime = new Date(selectedDate);
+            startTime.setHours(hours, minutes, 0, 0);
+
+            const endTime = new Date(startTime);
+            endTime.setHours(startTime.getHours() + duration);
+
             const res = await fetch("/api/reservations", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    userId: user.id,
-                    email: user.email,
-                    // pcId is now auto-assigned by backend
+                    pcId: selectedPC,
                     startTime: startTime.toISOString(),
-                    endTime: endTime.toISOString()
+                    endTime: endTime.toISOString(),
+                    gameId: wantGame ? selectedGame : null
                 }),
             });
 
@@ -139,7 +170,7 @@ export default function BookingCalendar() {
                     Recibirás tu link de conexión 5 minutos antes de la hora.
                 </p>
                 <button
-                    onClick={() => { setStep(1); setSelectedDate(null); setSelectedTime(null); }}
+                    onClick={() => { setStep(1); setSelectedDate(new Date()); setSelectedTime(null); }}
                     className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-orbitron rounded-sm transition-colors"
                 >
                     HACER OTRA RESERVA
@@ -242,12 +273,72 @@ export default function BookingCalendar() {
                                 >
                                     VOLVER
                                 </button>
+                                {/* Game Selection Step */}
+                                {selectedPC && (
+                                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                                        <h3 className="text-neon-cyan font-orbitron font-bold mb-4 flex items-center gap-2">
+                                            <span className="bg-neon-cyan text-black w-6 h-6 rounded-full flex items-center justify-center text-xs">4</span>
+                                            ¿QUIERES JUGAR ALGO ESPECÍFICO?
+                                        </h3>
+
+                                        <div className="glass p-6 rounded-lg border border-white/10">
+                                            <label className="flex items-center gap-3 cursor-pointer mb-6">
+                                                <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-colors ${wantGame ? 'bg-neon-cyan border-neon-cyan' : 'border-gray-500'}`}>
+                                                    {wantGame && <Check className="w-4 h-4 text-black" />}
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    className="hidden"
+                                                    checked={wantGame}
+                                                    onChange={(e) => {
+                                                        setWantGame(e.target.checked);
+                                                        if (!e.target.checked) setSelectedGame(null);
+                                                    }}
+                                                />
+                                                <span className="text-gray-300 font-orbitron">Sí, quiero reservar un juego instalado</span>
+                                            </label>
+
+                                            {wantGame && (
+                                                <div className="animate-in fade-in zoom-in-95 duration-300">
+                                                    {loadingGames ? (
+                                                        <div className="text-center py-8 text-gray-400">Cargando juegos...</div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                                            {games.map((game) => (
+                                                                <div
+                                                                    key={game.id}
+                                                                    onClick={() => setSelectedGame(game.id)}
+                                                                    className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedGame === game.id ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,243,255,0.5)] scale-105' : 'border-transparent hover:border-white/30'}`}
+                                                                >
+                                                                    <img
+                                                                        src={game.imageUrl}
+                                                                        alt={game.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-2">
+                                                                        <span className="text-xs font-bold text-white font-orbitron truncate w-full text-center">{game.name}</span>
+                                                                    </div>
+                                                                    {selectedGame === game.id && (
+                                                                        <div className="absolute top-2 right-2 bg-neon-cyan text-black rounded-full p-1">
+                                                                            <Check className="w-3 h-3" />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <button
-                                    onClick={handleConfirm}
-                                    disabled={!user || loading}
-                                    className="flex-1 py-3 bg-neon-cyan text-black font-bold font-orbitron hover:bg-white transition-colors flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={handleBooking}
+                                    disabled={!user || loading || (wantGame && !selectedGame)}
+                                    className="w-full py-4 bg-neon-cyan text-black font-bold font-orbitron text-xl hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed clip-path-slant"
                                 >
-                                    {loading ? <RefreshCw className="animate-spin" /> : "CONFIRMAR"}
+                                    {loading ? "CONFIRMANDO..." : "CONFIRMAR RESERVA"}
                                 </button>
                             </div>
                         </div>

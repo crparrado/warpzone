@@ -29,17 +29,25 @@ model PC {
 
 model Reservation {
   id        String   @id @default(uuid())
-  startTime DateTime
-  endTime   DateTime
-  status    String   @default("CONFIRMED") // PENDING, CONFIRMED, COMPLETED, CANCELLED
-  
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  
   pcId      String
   pc        PC       @relation(fields: [pcId], references: [id])
-
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("CONFIRMED") // CONFIRMED, CANCELLED
+  gameId    String?
+  game      Game?    @relation(fields: [gameId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Game {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  reservations Reservation[]
 }
 
 model Product {

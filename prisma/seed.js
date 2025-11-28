@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
+const path = require('path')
 require('dotenv').config()
 
 const prisma = new PrismaClient()
@@ -35,6 +37,31 @@ async function main() {
         }
     }
     console.log('✅ Seeded 4 PCs (Idempotent)')
+
+    // Seed Games
+    const gamesDir = path.join(__dirname, '../public/games');
+    if (fs.existsSync(gamesDir)) {
+        const gameFiles = fs.readdirSync(gamesDir).filter(file => /\.(jpg|jpeg|png|webp)$/i.test(file));
+
+        for (const file of gameFiles) {
+            const name = path.parse(file).name.replace(/_/g, ' '); // Replace underscores with spaces
+            const imageUrl = `/games/${file}`;
+
+            const existingGame = await prisma.game.findFirst({ where: { imageUrl } });
+
+            if (existingGame) {
+                await prisma.game.update({
+                    where: { id: existingGame.id },
+                    data: { name, active: true }
+                });
+            } else {
+                await prisma.game.create({
+                    data: { name, imageUrl, active: true }
+                });
+            }
+        }
+        console.log(`✅ Seeded ${gameFiles.length} games`);
+    }
 
     // Create Admin Users
     const admins = [
