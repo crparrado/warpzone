@@ -67,7 +67,7 @@ async function main() {
             if (existingGame) {
                 await prisma.game.update({
                     where: { id: existingGame.id },
-                    data: { name, active: true, maxCopies: 1 } // Default: 1 copy (change manually for multi-license games)
+                    data: { name } // Only update name to match filename, preserve active status and maxCopies
                 });
             } else {
                 await prisma.game.create({
