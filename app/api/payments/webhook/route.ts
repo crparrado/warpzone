@@ -36,6 +36,17 @@ export async function POST(request: Request) {
                     const productId = parts[2];
 
                     if (userId && !isNaN(minutes)) {
+                        // 0. Idempotency Check
+                        // Check if this payment ID was already processed
+                        const existingPurchase = await prisma.purchase.findUnique({
+                            where: { paymentId: id?.toString() }
+                        });
+
+                        if (existingPurchase) {
+                            console.log(`Payment ${id} already processed. Skipping.`);
+                            return NextResponse.json({ status: "ok", message: "Already processed" });
+                        }
+
                         // 1. Update User Minutes
                         const user = await prisma.user.update({
                             where: { id: userId },
@@ -62,7 +73,8 @@ export async function POST(request: Request) {
                                             userId,
                                             productId,
                                             amount,
-                                            status: "COMPLETED"
+                                            status: "COMPLETED",
+                                            paymentId: id?.toString()
                                         }
                                     });
                                     purchaseId = purchase.id;
