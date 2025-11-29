@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import ReservationEmail from '@/components/emails/ReservationEmail';
 import ParsecEmail from '@/components/emails/ParsecEmail';
 import { PurchaseEmail } from '@/components/emails/PurchaseEmail';
+import ResetPasswordEmail from '@/components/emails/ResetPasswordEmail';
 
 // Initialize Resend with API Key (we need to add this to .env)
 // This global initialization is removed as per instruction to initialize inside functions.
@@ -267,6 +268,69 @@ export async function sendPurchaseConfirmationEmail(email: string, userName: str
                 </div>
 
                 <!-- Footer -->
+                <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px;">
+                  WARPZONE CHILE<br />Santiago de Chile
+                </div>
+              </div>
+            </body>
+          </html>
+        `
+      });
+    } catch (e) {
+      console.error("Fallback failed", e);
+    }
+  }
+}
+
+export async function sendPasswordResetEmail(email: string, resetToken: string, userName?: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://warpzone.cl';
+  const resetLink = `${appUrl}/auth/reset-password?token=${resetToken}`;
+
+  if (!apiKey) {
+    console.error("⚠️ RESEND_API_KEY missing in environment variables for password reset email.");
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+  const safeUserName = userName || "Gamer";
+
+  try {
+    await resend.emails.send({
+      from: 'Warpzone <soporte@warpzone.cl>',
+      to: [email],
+      subject: '🔐 Recuperación de Contraseña - Warpzone',
+      react: ResetPasswordEmail({ resetLink, userName: safeUserName }),
+    });
+    console.log(`✅ Password reset email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    // Fallback
+    try {
+      await resend.emails.send({
+        from: 'Warpzone <soporte@warpzone.cl>',
+        to: [email],
+        subject: '🔐 Recuperación de Contraseña - Warpzone',
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);">
+                <div style="background-color: #000; padding: 30px 0; text-align: center; border-bottom: 1px solid #333;">
+                  <h1 style="color: #00f3ff; font-size: 36px; font-weight: 900; letter-spacing: 6px; margin: 0; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);">WARPZONE</h1>
+                </div>
+                <div style="padding: 40px; text-align: center;">
+                  <h2 style="color: #fff; font-size: 24px; margin: 0 0 20px;">RECUPERACIÓN DE CLAVE</h2>
+                  <p style="color: #aaa; font-size: 16px; line-height: 24px; margin: 0 0 30px;">
+                    Haz clic en el siguiente enlace para restablecer tu contraseña:
+                  </p>
+                  <a href="${resetLink}" style="display: inline-block; background-color: #00f3ff; border-radius: 4px; color: #000; font-size: 16px; font-weight: bold; text-decoration: none; padding: 16px 30px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);">
+                    RESTABLECER CONTRASEÑA
+                  </a>
+                  <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                    Si no solicitaste este cambio, ignora este correo.
+                  </p>
+                </div>
                 <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px;">
                   WARPZONE CHILE<br />Santiago de Chile
                 </div>

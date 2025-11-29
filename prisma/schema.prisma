@@ -94,3 +94,11 @@ model Achievement {
   icon        String?  // Optional icon/badge
   createdAt   DateTime @default(now())
 }
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+}
