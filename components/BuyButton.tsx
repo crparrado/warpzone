@@ -41,6 +41,7 @@ export default function BuyButton({ product }: { product: Product }) {
                         price: product.price,
                         userId: user.id,
                         minutes: product.minutes,
+                        productId: product.id,
                     }),
                 });
 

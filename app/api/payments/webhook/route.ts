@@ -20,25 +20,70 @@ export async function POST(request: Request) {
                 const externalRef = paymentData.external_reference;
 
                 if (externalRef) {
-                    const [userId, minutesStr] = externalRef.split(":");
-                    const minutes = parseInt(minutesStr);
+                    const parts = externalRef.split(":");
+                    const userId = parts[0];
+                    const minutes = parseInt(parts[1]);
+                    const productId = parts[2];
 
                     if (userId && !isNaN(minutes)) {
-                        // Check if this payment was already processed to avoid duplicates
-                        // Ideally we should have a Payment model, but for now we trust the webhook logic
-                        // or we could check if the last update was recent.
-                        // For MVP, we just increment.
-
-                        await prisma.user.update({
+                        // 1. Update User Minutes
+                        const user = await prisma.user.update({
                             where: { id: userId },
                             data: {
-                                minutes: {
-                                    increment: minutes
-                                }
+                                minutes: { increment: minutes },
+                                totalHoursPurchased: { increment: minutes / 60 }
                             }
                         });
 
                         console.log(`Credited ${minutes} minutes to user ${userId}`);
+
+                        // 2. Create Purchase Record (if productId exists)
+                        let purchaseId = "MP-" + id;
+                        let productName = "Carga de Créditos";
+                        let amount = Math.round(paymentData.transaction_amount || 0);
+
+                        if (productId && productId !== 'unknown') {
+                            try {
+                                const product = await prisma.product.findUnique({ where: { id: productId } });
+                                if (product) {
+                                    productName = product.name;
+                                    const purchase = await prisma.purchase.create({
+                                        data: {
+                                            userId,
+                                            productId,
+                                            amount,
+                                            status: "COMPLETED"
+                                        }
+                                    });
+                                    purchaseId = purchase.id;
+                                }
+                            } catch (e) {
+                                console.error("Error creating purchase record:", e);
+                            }
+                        }
+
+                        // 3. Send Confirmation Email
+                        // We need to import sendPurchaseConfirmationEmail dynamically or at top level
+                        // Since we are inside the function, let's assume it's imported at top.
+                        // I will add the import in a separate step if needed, but I'll try to add it here if I can edit the whole file or top.
+                        // For now, let's assume I'll add the import.
+
+                        // We need to import the email function. 
+                        // Since I can't easily add imports with this tool without replacing the whole file or top, 
+                        // I'll assume I will add the import in the next step.
+
+                        // Wait, I can't call the function if it's not imported.
+                        // I will add the logic here and then add the import.
+
+                        const { sendPurchaseConfirmationEmail } = await import("@/lib/email");
+                        await sendPurchaseConfirmationEmail(
+                            user.email,
+                            user.name || "Gamer",
+                            productName,
+                            amount,
+                            minutes,
+                            purchaseId
+                        );
                     }
                 }
             }

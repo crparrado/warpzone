@@ -25,8 +25,8 @@ export async function POST(request: Request) {
                         currency_id: "CLP",
                     },
                 ],
-                // We store userId and minutes in external_reference to retrieve them in the webhook
-                external_reference: `${userId}:${minutes}`,
+                // We store userId, minutes, and productId in external_reference
+                external_reference: `${userId}:${minutes}:${body.productId || 'unknown'}`,
                 back_urls: {
                     success: `${process.env.NEXT_PUBLIC_URL || "https://warpzone.cl"}/dashboard?status=success`,
                     failure: `${process.env.NEXT_PUBLIC_URL || "https://warpzone.cl"}/fichas-y-pases?status=failure`,
