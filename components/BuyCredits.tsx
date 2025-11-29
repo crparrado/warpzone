@@ -13,7 +13,16 @@ interface Plan {
 
 export default function BuyCredits() {
     const [loading, setLoading] = useState<string | null>(null);
+    const [discount, setDiscount] = useState(0);
     const router = useRouter();
+
+    // Fetch discount on mount
+    useState(() => {
+        fetch("/api/settings/discount")
+            .then(res => res.json())
+            .then(data => setDiscount(data.discount))
+            .catch(err => console.error("Error fetching discount:", err));
+    });
 
     const plans: Plan[] = [
         { hours: 1, price: 2000, label: "Partida Rápida" },
@@ -25,20 +34,16 @@ export default function BuyCredits() {
         try {
             setLoading(plan.label);
 
-            // We need a user ID for the preference. 
-            // Ideally this comes from auth context, but for now we'll check if we can get it or handle it in the backend.
-            // The existing create-preference route expects userId.
-            // Let's fetch the user first.
-
             const userRes = await fetch("/api/auth/me");
             const user = await userRes.json();
 
             if (!user || !user.id) {
-                // Redirect to login if not logged in
-                // Encode the return URL to come back here
                 router.push("/login?callbackUrl=/reservas");
                 return;
             }
+
+            // Calculate discounted price
+            const finalPrice = Math.round(plan.price * (1 - discount / 100));
 
             const response = await fetch("/api/payments/create-preference", {
                 method: "POST",
@@ -48,9 +53,9 @@ export default function BuyCredits() {
                 body: JSON.stringify({
                     title: `${plan.hours} Horas Warpzone`,
                     quantity: 1,
-                    price: plan.price,
+                    price: finalPrice,
                     userId: user.id,
-                    minutes: plan.hours * 60 // Convert hours to minutes for the backend logic
+                    minutes: plan.hours * 60
                 }),
             });
 
@@ -76,30 +81,47 @@ export default function BuyCredits() {
 
     return (
         <div className="grid gap-6">
-            {plans.map((plan, i) => (
-                <div
-                    key={i}
-                    onClick={() => !loading && handleBuy(plan)}
-                    className={`glass p-6 flex justify-between items-center cursor-pointer hover:border-neon-cyan transition-all 
-                        ${plan.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}
-                        ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-                    `}
-                >
-                    <div>
-                        <h3 className="text-xl font-bold font-orbitron text-white">{plan.hours} HORA{plan.hours > 1 ? 'S' : ''}</h3>
-                        <p className="text-sm text-gray-400">{plan.label}</p>
+            {plans.map((plan, i) => {
+                const discountedPrice = Math.round(plan.price * (1 - discount / 100));
+
+                return (
+                    <div
+                        key={i}
+                        onClick={() => !loading && handleBuy(plan)}
+                        className={`glass p-6 flex justify-between items-center cursor-pointer hover:border-neon-cyan transition-all 
+                            ${plan.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}
+                            ${loading ? 'opacity-50 cursor-not-allowed' : ''}
+                        `}
+                    >
+                        <div>
+                            <h3 className="text-xl font-bold font-orbitron text-white">{plan.hours} HORA{plan.hours > 1 ? 'S' : ''}</h3>
+                            <p className="text-sm text-gray-400">{plan.label}</p>
+                            {discount > 0 && (
+                                <span className="inline-block mt-2 bg-neon-magenta text-black text-xs font-bold px-2 py-0.5 rounded">
+                                    -{discount}% OFF
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-right">
+                            {discount > 0 ? (
+                                <>
+                                    <p className="text-sm text-gray-500 line-through">${plan.price.toLocaleString('es-CL')}</p>
+                                    <p className="text-2xl font-bold text-neon-magenta">${discountedPrice.toLocaleString('es-CL')}</p>
+                                </>
+                            ) : (
+                                <p className="text-2xl font-bold text-neon-cyan">${plan.price.toLocaleString('es-CL')}</p>
+                            )}
+
+                            <button
+                                disabled={!!loading}
+                                className="text-xs text-white underline hover:text-neon-magenta flex items-center justify-end gap-2 ml-auto mt-1"
+                            >
+                                {loading === plan.label ? <Loader2 className="w-4 h-4 animate-spin" /> : "COMPRAR"}
+                            </button>
+                        </div>
                     </div>
-                    <div className="text-right">
-                        <p className="text-2xl font-bold text-neon-cyan">${plan.price.toLocaleString('es-CL')}</p>
-                        <button
-                            disabled={!!loading}
-                            className="text-xs text-white underline hover:text-neon-magenta flex items-center justify-end gap-2 ml-auto"
-                        >
-                            {loading === plan.label ? <Loader2 className="w-4 h-4 animate-spin" /> : "COMPRAR"}
-                        </button>
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
