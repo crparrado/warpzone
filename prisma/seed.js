@@ -38,6 +38,10 @@ async function main() {
     }
 
     // Delete any extra PCs (duplicates created by previous runs)
+    // Delete any extra PCs (duplicates created by previous runs)
+    // DISABLED: This causes errors if the extra PCs have reservations.
+    // We should not delete PCs automatically in production.
+    /*
     if (existingPCs.length > pcs.length) {
         const toDelete = existingPCs.slice(pcs.length);
         console.log(`Deleting ${toDelete.length} extra/duplicate PCs...`);
@@ -46,11 +50,10 @@ async function main() {
                 await prisma.pC.delete({ where: { id: pc.id } });
             } catch (e) {
                 console.error(`Could not delete PC ${pc.name} (id: ${pc.id}). It might have reservations. Error: ${e.message}`);
-                // If we can't delete it, at least mark it as MAINTENANCE or rename it to avoid confusion?
-                // For now, let's just log it. In a strict cleanup we might need to delete reservations first.
             }
         }
     }
+    */
     console.log('✅ Seeded 4 PCs (Idempotent)')
 
     // Seed Games
