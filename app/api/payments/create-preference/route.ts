@@ -33,6 +33,7 @@ export async function POST(request: Request) {
                     pending: `${process.env.NEXT_PUBLIC_URL || "https://warpzone.cl"}/fichas-y-pases?status=pending`,
                 },
                 auto_return: "approved",
+                notification_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://warpzone.cl"}/api/payments/webhook`,
             },
         });
 

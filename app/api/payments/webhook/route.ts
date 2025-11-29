@@ -9,8 +9,18 @@ const client = new MercadoPagoConfig({
 export async function POST(request: Request) {
     try {
         const url = new URL(request.url);
-        const topic = url.searchParams.get("topic") || url.searchParams.get("type");
-        const id = url.searchParams.get("id") || url.searchParams.get("data.id");
+        let topic = url.searchParams.get("topic") || url.searchParams.get("type");
+        let id = url.searchParams.get("id") || url.searchParams.get("data.id");
+
+        if (!id) {
+            try {
+                const body = await request.json();
+                topic = body.type || body.topic;
+                id = body.data?.id || body.id;
+            } catch (e) {
+                // Body might be empty or not json
+            }
+        }
 
         if (topic === "payment" && id) {
             const payment = new Payment(client);
