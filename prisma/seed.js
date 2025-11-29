@@ -116,13 +116,39 @@ async function main() {
     ];
 
     for (const product of products) {
-        const existingProduct = await prisma.product.findFirst({ where: { name: product.name } });
-        if (existingProduct) {
+        // Find ALL products with this name to check for duplicates
+        const existingProducts = await prisma.product.findMany({
+            where: { name: product.name },
+            orderBy: { createdAt: 'asc' }
+        });
+
+        if (existingProducts.length > 0) {
+            // Update the first one (oldest)
+            const toKeep = existingProducts[0];
+            console.log(`Updating existing product: ${toKeep.name} (${toKeep.id})`);
             await prisma.product.update({
-                where: { id: existingProduct.id },
+                where: { id: toKeep.id },
                 data: product
             });
+
+            // Delete duplicates if any
+            if (existingProducts.length > 1) {
+                const toDelete = existingProducts.slice(1);
+                console.log(`Found ${toDelete.length} duplicates for ${product.name}. Deleting...`);
+                for (const duplicate of toDelete) {
+                    try {
+                        // Check if it has purchases before deleting? 
+                        // The user specifically asked to delete the extra one.
+                        // We'll try to delete. If it fails due to constraints, we'll log it.
+                        await prisma.product.delete({ where: { id: duplicate.id } });
+                        console.log(`Deleted duplicate product: ${duplicate.name} (${duplicate.id})`);
+                    } catch (e) {
+                        console.error(`Could not delete duplicate product ${duplicate.name} (${duplicate.id}): ${e.message}`);
+                    }
+                }
+            }
         } else {
+            console.log(`Creating new product: ${product.name}`);
             await prisma.product.create({ data: product });
         }
     }
