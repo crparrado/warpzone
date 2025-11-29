@@ -2,7 +2,22 @@ import { Clock, CreditCard, Calendar } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
 import BuyCredits from "@/components/BuyCredits";
 
-export default function Reservas() {
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
+async function getDiscount() {
+    try {
+        const settings = await prisma.systemSettings.findFirst();
+        return settings?.generalDiscount || 0;
+    } catch (error) {
+        return 0;
+    }
+}
+
+export default async function Reservas() {
+    const discount = await getDiscount();
+
     return (
         <div className="min-h-screen pt-24 px-6 pb-12">
             <div className="max-w-7xl mx-auto">

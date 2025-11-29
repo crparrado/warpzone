@@ -11,18 +11,13 @@ interface Plan {
     popular?: boolean;
 }
 
-export default function BuyCredits() {
-    const [loading, setLoading] = useState<string | null>(null);
-    const [discount, setDiscount] = useState(0);
-    const router = useRouter();
+interface BuyCreditsProps {
+    discount?: number;
+}
 
-    // Fetch discount on mount
-    useState(() => {
-        fetch("/api/settings/discount")
-            .then(res => res.json())
-            .then(data => setDiscount(data.discount))
-            .catch(err => console.error("Error fetching discount:", err));
-    });
+export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
+    const [loading, setLoading] = useState<string | null>(null);
+    const router = useRouter();
 
     const plans: Plan[] = [
         { hours: 1, price: 2000, label: "Partida Rápida" },
