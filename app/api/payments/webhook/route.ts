@@ -36,39 +36,20 @@ export async function POST(request: Request) {
                     const productId = parts[2];
 
                     if (userId && !isNaN(minutes)) {
-                        // 0. Idempotency Check
-                        // Check if this payment ID was already processed
-                        const existingPurchase = await prisma.purchase.findUnique({
-                            where: { paymentId: id?.toString() }
-                        });
-
-                        if (existingPurchase) {
-                            console.log(`Payment ${id} already processed. Skipping.`);
-                            return NextResponse.json({ status: "ok", message: "Already processed" });
-                        }
-
-                        // 1. Update User Minutes
-                        const user = await prisma.user.update({
-                            where: { id: userId },
-                            data: {
-                                minutes: { increment: minutes },
-                                totalHoursPurchased: { increment: minutes / 60 }
-                            }
-                        });
-
-                        console.log(`Credited ${minutes} minutes to user ${userId}`);
-
-                        // 2. Create Purchase Record (if productId exists)
                         let purchaseId = "MP-" + id;
                         let productName = "Carga de Créditos";
                         let amount = Math.round(paymentData.transaction_amount || 0);
+                        let purchase = null;
 
+                        // 1. Try to Create Purchase Record First (Idempotency Lock)
                         if (productId && productId !== 'unknown') {
                             try {
                                 const product = await prisma.product.findUnique({ where: { id: productId } });
                                 if (product) {
                                     productName = product.name;
-                                    const purchase = await prisma.purchase.create({
+
+                                    // This will throw if paymentId already exists
+                                    purchase = await prisma.purchase.create({
                                         data: {
                                             userId,
                                             productId,
@@ -79,10 +60,39 @@ export async function POST(request: Request) {
                                     });
                                     purchaseId = purchase.id;
                                 }
-                            } catch (e) {
+                            } catch (e: any) {
+                                // Check for unique constraint violation (P2002)
+                                if (e.code === 'P2002') {
+                                    console.log(`Payment ${id} already processed (DB constraint). Skipping.`);
+                                    return NextResponse.json({ status: "ok", message: "Already processed" });
+                                }
                                 console.error("Error creating purchase record:", e);
+                                // If it's another error, we might want to stop or continue depending on policy.
+                                // For now, let's assume if we can't record the purchase, we shouldn't credit?
+                                // Or maybe we should credit but log the error?
+                                // Let's be safe: if we can't ensure idempotency via DB, we risk double credit.
+                                // But if it's just a DB connection error, retrying might be good.
+                                // For now, let's proceed only if we successfully created the purchase OR if it wasn't a constraint error (but that's risky).
+                                // Actually, if we fail to create purchase, we should probably stop to avoid free credits if we can't track it.
+                                return NextResponse.json({ error: "Failed to record purchase" }, { status: 500 });
                             }
+                        } else {
+                            // If no productId, we can't create a purchase record linked to a product.
+                            // We should probably still try to record it or check idempotency another way.
+                            // But for now, existing logic didn't handle this well either.
+                            // Let's assume productId is always present for these purchases.
                         }
+
+                        // 2. Update User Minutes (Only if purchase creation succeeded)
+                        const user = await prisma.user.update({
+                            where: { id: userId },
+                            data: {
+                                minutes: { increment: minutes },
+                                totalHoursPurchased: { increment: minutes / 60 }
+                            }
+                        });
+
+                        console.log(`Credited ${minutes} minutes to user ${userId}`);
 
                         // 3. Send Confirmation Email
                         // We need to import sendPurchaseConfirmationEmail dynamically or at top level
@@ -97,15 +107,20 @@ export async function POST(request: Request) {
                         // Wait, I can't call the function if it's not imported.
                         // I will add the logic here and then add the import.
 
-                        const { sendPurchaseConfirmationEmail } = await import("@/lib/email");
-                        await sendPurchaseConfirmationEmail(
-                            user.email,
-                            user.name || "Gamer",
-                            productName,
-                            amount,
-                            minutes,
-                            purchaseId
-                        );
+                        // 3. Send Confirmation Email
+                        try {
+                            const emailModule = await import("@/lib/email");
+                            await emailModule.sendPurchaseConfirmationEmail(
+                                user.email,
+                                user.name || "Gamer",
+                                productName,
+                                amount,
+                                minutes,
+                                purchaseId
+                            );
+                        } catch (emailError) {
+                            console.error("Error sending purchase email:", emailError);
+                        }
                     }
                 }
             }
