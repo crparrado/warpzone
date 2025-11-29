@@ -39,7 +39,7 @@ export default async function Reservas() {
                             <h2 className="text-2xl font-orbitron font-bold">COMPRA FICHAS</h2>
                         </div>
 
-                        <BuyCredits />
+                        <BuyCredits discount={discount} />
                     </div>
 
                     {/* Step 2: Book Slot */}
