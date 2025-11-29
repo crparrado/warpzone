@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
     try {
         const purchases = await prisma.purchase.findMany({
+            where: {
+                status: 'COMPLETED'
+            },
             include: {
                 user: {
                     select: { name: true, email: true }
