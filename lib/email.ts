@@ -344,3 +344,49 @@ export async function sendPasswordResetEmail(email: string, resetToken: string, 
     }
   }
 }
+
+export async function sendAdminPurchaseNotification(userName: string, userEmail: string, productName: string, amount: number, purchaseId: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.error("⚠️ RESEND_API_KEY missing in environment variables for admin notification.");
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+  const dateStr = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' });
+  const admins = ["crparrado@gmail.com", "martongas89@gmail.com"];
+
+  try {
+    await resend.emails.send({
+      from: 'Warpzone System <system@warpzone.cl>',
+      to: admins,
+      subject: `💰 Nueva Compra: ${userName} - $${amount.toLocaleString('es-CL')}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <body style="font-family: sans-serif; background-color: #f4f4f4; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <h2 style="color: #333; border-bottom: 2px solid #00f3ff; padding-bottom: 10px;">Nueva Compra Registrada</h2>
+              
+              <div style="margin: 20px 0;">
+                <p><strong>Usuario:</strong> ${userName} (${userEmail})</p>
+                <p><strong>Producto:</strong> ${productName}</p>
+                <p><strong>Monto:</strong> $${amount.toLocaleString('es-CL')}</p>
+                <p><strong>Fecha:</strong> ${dateStr}</p>
+                <p><strong>ID Transacción:</strong> ${purchaseId}</p>
+              </div>
+
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                Notificación automática del sistema Warpzone.
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    });
+    console.log(`✅ Admin notification sent to ${admins.join(', ')}`);
+  } catch (error) {
+    console.error("Error sending admin notification:", error);
+  }
+}
