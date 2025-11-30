@@ -121,6 +121,20 @@ export async function POST(request: Request) {
                         } catch (emailError) {
                             console.error("Error sending purchase email:", emailError);
                         }
+
+                        // 4. Send Admin Notification
+                        try {
+                            const emailModule = await import("@/lib/email");
+                            await emailModule.sendAdminPurchaseNotification(
+                                user.name || "Usuario",
+                                user.email,
+                                productName,
+                                amount,
+                                purchaseId
+                            );
+                        } catch (adminEmailError) {
+                            console.error("Error sending admin notification:", adminEmailError);
+                        }
                     }
                 }
             }
