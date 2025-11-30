@@ -36,7 +36,7 @@ export default function Navbar() {
 
     return (
         <nav className="w-full fixed top-0 z-50 glass px-6 py-4 flex justify-between items-center backdrop-blur-md bg-black/30 border-b border-white/10">
-            <Link href="/" className="text-3xl font-orbitron font-bold text-neon-cyan tracking-wider hover:text-neon-magenta transition-colors">
+            <Link href="/" className="text-2xl font-orbitron font-bold text-neon-cyan tracking-wider hover:text-neon-magenta transition-colors">
                 WARPZONE
             </Link>
 
