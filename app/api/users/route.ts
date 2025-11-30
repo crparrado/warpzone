@@ -3,8 +3,19 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
+
+    const where = search ? {
+        OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } }
+        ]
+    } : {};
+
     const users = await prisma.user.findMany({
+        where: where as any, // Type assertion needed for insensitive mode sometimes depending on Prisma version
         orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(users);

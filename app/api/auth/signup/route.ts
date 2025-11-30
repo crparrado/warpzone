@@ -14,6 +14,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "El email ya está registrado" }, { status: 400 });
         }
 
+        const existingName = await prisma.user.findFirst({ where: { name } });
+        if (existingName) {
+            return NextResponse.json({ error: "El nombre de usuario ya está en uso" }, { status: 400 });
+        }
+
         const user = await prisma.user.create({
             data: {
                 name,
