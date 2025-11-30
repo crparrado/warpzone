@@ -68,15 +68,27 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ error: "Product not found" }, { status: 404 });
         }
 
-        // 2. Find a replacement product (same name, different ID)
-        // This is crucial for merging duplicates
-        const replacementProduct = await prisma.product.findFirst({
+        // 2. Find a replacement product
+        // First try exact name match
+        let replacementProduct = await prisma.product.findFirst({
             where: {
                 name: productToDelete.name,
                 id: { not: id }
             },
             orderBy: { createdAt: 'asc' }
         });
+
+        // If no name match, try matching by minutes and price (handling "1 HORA" vs "Ficha 1 Hora" case)
+        if (!replacementProduct) {
+            replacementProduct = await prisma.product.findFirst({
+                where: {
+                    minutes: productToDelete.minutes,
+                    price: productToDelete.price,
+                    id: { not: id }
+                },
+                orderBy: { createdAt: 'asc' }
+            });
+        }
 
         if (replacementProduct) {
             // 3. Reassign purchases to the replacement product
@@ -87,13 +99,14 @@ export async function DELETE(req: Request) {
             console.log(`Reassigned ${updateResult.count} purchases from ${id} to ${replacementProduct.id}`);
         } else {
             // If no replacement found, check if there are purchases.
-            // If there are purchases and no replacement, we can't delete safely without losing data.
-            // But the user insisted on deleting.
-            // For now, let's try to delete. If it fails, the catch block will handle it.
-            // Alternatively, we could prevent deletion if purchases exist and no replacement is found.
             const purchaseCount = await prisma.purchase.count({ where: { productId: id } });
             if (purchaseCount > 0) {
-                return NextResponse.json({ error: "Cannot delete product with existing purchases (no replacement found)" }, { status: 400 });
+                // Last resort: Find ANY product with the same minutes? 
+                // Or just fail. Failing is safer, but user is stuck.
+                // Let's return a more descriptive error.
+                return NextResponse.json({
+                    error: "No se puede eliminar: Tiene compras asociadas y no se encontró otro producto equivalente (mismo nombre o mismo precio/duración) para transferirlas."
+                }, { status: 400 });
             }
         }
 
