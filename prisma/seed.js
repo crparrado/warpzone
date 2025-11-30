@@ -137,9 +137,17 @@ async function main() {
                 console.log(`Found ${toDelete.length} duplicates for ${product.name}. Deleting...`);
                 for (const duplicate of toDelete) {
                     try {
-                        // Check if it has purchases before deleting? 
-                        // The user specifically asked to delete the extra one.
-                        // We'll try to delete. If it fails due to constraints, we'll log it.
+                        // Reassign purchases to the master product before deleting
+                        // This fixes the "Foreign key constraint failed" error
+                        const purchases = await prisma.purchase.updateMany({
+                            where: { productId: duplicate.id },
+                            data: { productId: toKeep.id }
+                        });
+
+                        if (purchases.count > 0) {
+                            console.log(`Reassigned ${purchases.count} purchases from ${duplicate.id} to ${toKeep.id}`);
+                        }
+
                         await prisma.product.delete({ where: { id: duplicate.id } });
                         console.log(`Deleted duplicate product: ${duplicate.name} (${duplicate.id})`);
                     } catch (e) {
