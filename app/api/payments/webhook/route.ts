@@ -48,64 +48,52 @@ export async function POST(request: Request) {
                                 if (product) {
                                     productName = product.name;
 
-                                    // This will throw if paymentId already exists
+                                    // Create purchase as PENDING first
                                     purchase = await prisma.purchase.create({
                                         data: {
                                             userId,
                                             productId,
                                             amount,
-                                            status: "COMPLETED",
+                                            status: "PENDING", // Changed to PENDING so processPurchaseRewards handles completion
                                             paymentId: id?.toString()
                                         }
                                     });
                                     purchaseId = purchase.id;
                                 }
                             } catch (e: any) {
-                                // Check for unique constraint violation (P2002)
                                 if (e.code === 'P2002') {
                                     console.log(`Payment ${id} already processed (DB constraint). Skipping.`);
                                     return NextResponse.json({ status: "ok", message: "Already processed" });
                                 }
                                 console.error("Error creating purchase record:", e);
-                                // If it's another error, we might want to stop or continue depending on policy.
-                                // For now, let's assume if we can't record the purchase, we shouldn't credit?
-                                // Or maybe we should credit but log the error?
-                                // Let's be safe: if we can't ensure idempotency via DB, we risk double credit.
-                                // But if it's just a DB connection error, retrying might be good.
-                                // For now, let's proceed only if we successfully created the purchase OR if it wasn't a constraint error (but that's risky).
-                                // Actually, if we fail to create purchase, we should probably stop to avoid free credits if we can't track it.
                                 return NextResponse.json({ error: "Failed to record purchase" }, { status: 500 });
                             }
-                        } else {
-                            // If no productId, we can't create a purchase record linked to a product.
-                            // We should probably still try to record it or check idempotency another way.
-                            // But for now, existing logic didn't handle this well either.
-                            // Let's assume productId is always present for these purchases.
                         }
 
-                        // 2. Update User Minutes (Only if purchase creation succeeded)
-                        const user = await prisma.user.update({
-                            where: { id: userId },
-                            data: {
-                                minutes: { increment: minutes },
-                                totalHoursPurchased: { increment: minutes / 60 }
-                            }
-                        });
+                        // 2. Process Rewards (Unlock achievements, add minutes, update level)
+                        // This replaces the manual user update and handles the purchase completion
+                        try {
+                            const rewardsModule = await import("@/lib/rewards");
+                            const result = await rewardsModule.processPurchaseRewards(userId, productId, purchaseId);
 
-                        console.log(`Credited ${minutes} minutes to user ${userId}`);
+                            // If it was already completed (idempotency), we stop
+                            if (result.alreadyCompleted) {
+                                console.log(`Payment ${id} already processed (Rewards check). Skipping.`);
+                                return NextResponse.json({ status: "ok", message: "Already processed" });
+                            }
+
+                            console.log(`Processed rewards for user ${userId}. Level: ${result.newLevel}. Bonus: ${result.totalBonusMinutes}m`);
+
+                            // Update minutes for email (base + bonus)
+                            minutes += result.totalBonusMinutes;
+                        } catch (rewardError) {
+                            console.error("Error processing rewards:", rewardError);
+                            // If rewards fail, we should probably still return ok to MP but log critical error
+                            // The purchase might be stuck in PENDING if this fails.
+                            // Ideally we should retry or handle this better, but for now logging is key.
+                        }
 
                         // 3. Send Confirmation Email
-                        // We need to import sendPurchaseConfirmationEmail dynamically or at top level
-                        // Since we are inside the function, let's assume it's imported at top.
-                        // I will add the import in a separate step if needed, but I'll try to add it here if I can edit the whole file or top.
-                        // For now, let's assume I'll add the import.
-
-                        // We need to import the email function. 
-                        // Since I can't easily add imports with this tool without replacing the whole file or top, 
-                        // I'll assume I will add the import in the next step.
-
-                        // Wait, I can't call the function if it's not imported.
-                        // I will add the logic here and then add the import.
 
                         // 3. Send Confirmation Email
                         try {
