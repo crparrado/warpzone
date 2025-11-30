@@ -32,7 +32,7 @@ export async function POST(request: Request) {
                 if (externalRef) {
                     const parts = externalRef.split(":");
                     const userId = parts[0];
-                    const minutes = parseInt(parts[1]);
+                    let minutes = parseInt(parts[1]); // Changed to let
                     const productId = parts[2];
 
                     if (userId && !isNaN(minutes)) {
@@ -40,6 +40,13 @@ export async function POST(request: Request) {
                         let productName = "Carga de Créditos";
                         let amount = Math.round(paymentData.transaction_amount || 0);
                         let purchase = null;
+
+                        // Fetch user for emails
+                        const user = await prisma.user.findUnique({ where: { id: userId } });
+                        if (!user) {
+                            console.error("User not found for webhook:", userId);
+                            return NextResponse.json({ error: "User not found" }, { status: 404 });
+                        }
 
                         // 1. Try to Create Purchase Record First (Idempotency Lock)
                         if (productId && productId !== 'unknown') {
