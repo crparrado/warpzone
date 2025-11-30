@@ -41,6 +41,7 @@ export async function GET() {
 
         const recentPurchases = await prisma.purchase.findMany({
             take: 5,
+            where: { status: 'COMPLETED' },
             orderBy: { createdAt: 'desc' },
             include: { user: true, product: true },
         });
