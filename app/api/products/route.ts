@@ -62,6 +62,42 @@ export async function DELETE(req: Request) {
         const body = await req.json();
         const { id } = body;
 
+        // 1. Find the product to delete
+        const productToDelete = await prisma.product.findUnique({ where: { id } });
+        if (!productToDelete) {
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        // 2. Find a replacement product (same name, different ID)
+        // This is crucial for merging duplicates
+        const replacementProduct = await prisma.product.findFirst({
+            where: {
+                name: productToDelete.name,
+                id: { not: id }
+            },
+            orderBy: { createdAt: 'asc' }
+        });
+
+        if (replacementProduct) {
+            // 3. Reassign purchases to the replacement product
+            const updateResult = await prisma.purchase.updateMany({
+                where: { productId: id },
+                data: { productId: replacementProduct.id }
+            });
+            console.log(`Reassigned ${updateResult.count} purchases from ${id} to ${replacementProduct.id}`);
+        } else {
+            // If no replacement found, check if there are purchases.
+            // If there are purchases and no replacement, we can't delete safely without losing data.
+            // But the user insisted on deleting.
+            // For now, let's try to delete. If it fails, the catch block will handle it.
+            // Alternatively, we could prevent deletion if purchases exist and no replacement is found.
+            const purchaseCount = await prisma.purchase.count({ where: { productId: id } });
+            if (purchaseCount > 0) {
+                return NextResponse.json({ error: "Cannot delete product with existing purchases (no replacement found)" }, { status: 400 });
+            }
+        }
+
+        // 4. Delete the product
         await prisma.product.delete({
             where: { id }
         });
