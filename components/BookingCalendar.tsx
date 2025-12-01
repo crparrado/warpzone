@@ -287,8 +287,8 @@ export default function BookingCalendar() {
                                     >
                                         <div className="font-orbitron font-bold text-white mb-1">{pc.name}</div>
                                         <div className="text-xs text-gray-400 flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${pc.status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                            {pc.status === 'available' ? 'Disponible' : 'Ocupado'}
+                                            <div className={`w-2 h-2 rounded-full ${pc.status === 'AVAILABLE' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                            {pc.status === 'AVAILABLE' ? 'Disponible' : 'Ocupado'}
                                         </div>
                                         {selectedPC === pc.id && (
                                             <div className="absolute top-2 right-2 text-neon-cyan">
