@@ -64,7 +64,7 @@ export default function AdminReservations() {
                                 onClick={() => setSelectedRes(res)}
                                 className="w-full text-left p-2 bg-neon-magenta/10 border border-neon-magenta/30 hover:bg-neon-magenta/20 rounded text-xs transition-colors group"
                             >
-                                <div className="font-bold text-white group-hover:text-neon-magenta">{new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                <div className="font-bold text-white group-hover:text-neon-magenta">{new Date(res.startTime).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })}</div>
                                 <div className="text-gray-400 truncate">{res.user.name}</div>
                                 <div className="text-gray-500 truncate text-[10px]">{res.pc.name}</div>
                                 {res.game && <div className="text-neon-cyan truncate text-[10px] flex items-center gap-1"><Gamepad2 className="w-3 h-3" /> {res.game.name}</div>}
@@ -149,10 +149,10 @@ export default function AdminReservations() {
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2 text-gray-300">
-                                                <CalendarIcon className="w-4 h-4 text-gray-500" /> {new Date(res.startTime).toLocaleDateString()}
+                                                <CalendarIcon className="w-4 h-4 text-gray-500" /> {new Date(res.startTime).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })}
                                             </div>
                                             <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
-                                                <Clock className="w-3 h-3 text-gray-600" /> {new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(res.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                <Clock className="w-3 h-3 text-gray-600" /> {new Date(res.startTime).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })} - {new Date(res.endTime).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </td>
                                         <td className="p-4 text-gray-400">
@@ -237,10 +237,10 @@ export default function AdminReservations() {
                                     <div>
                                         <div className="text-sm text-gray-400 font-orbitron">HORARIO</div>
                                         <div className="text-white font-bold">
-                                            {new Date(selectedRes.startTime).toLocaleDateString()}
+                                            {new Date(selectedRes.startTime).toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })}
                                         </div>
                                         <div className="text-sm text-gray-500">
-                                            {new Date(selectedRes.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedRes.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(selectedRes.startTime).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })} - {new Date(selectedRes.endTime).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
                                 </div>

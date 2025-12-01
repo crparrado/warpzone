@@ -88,8 +88,60 @@ export default function BookingCalendar() {
         try {
             // Create date object from selected date and time
             const [hours, minutes] = selectedTime.split(':').map(Number);
-            const startTime = new Date(selectedDate);
-            startTime.setHours(hours, minutes, 0, 0);
+
+            // We need to construct a Date that corresponds to the selected YYYY-MM-DD HH:mm in Chile.
+            // Since we don't have a timezone library, we'll use a robust approximation using Intl.
+
+            // 1. Create a base date in UTC with the selected components
+            const baseDate = new Date(Date.UTC(
+                selectedDate.getFullYear(),
+                selectedDate.getMonth(),
+                selectedDate.getDate(),
+                hours,
+                minutes,
+                0
+            ));
+
+            // 2. Get the parts of this UTC date as if it were in Chile
+            // This tells us: "When it is X time in UTC, what time is it in Chile?"
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/Santiago',
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+                hour12: false
+            });
+
+            const parts = formatter.formatToParts(baseDate);
+            const chileParts: any = {};
+            parts.forEach(p => chileParts[p.type] = p.value);
+
+            // 3. Calculate the difference (offset) between UTC and Chile for this specific time
+            // We reconstruct the "Chile Time" as a UTC date to compare
+            const chileTimeAsUTC = new Date(Date.UTC(
+                parseInt(chileParts.year),
+                parseInt(chileParts.month) - 1,
+                parseInt(chileParts.day),
+                parseInt(chileParts.hour),
+                parseInt(chileParts.minute),
+                parseInt(chileParts.second)
+            ));
+
+            // The difference in milliseconds. 
+            // If base (UTC) is 12:00 and Chile says it's 09:00, diff is 3 hours.
+            // This means Chile is UTC-3.
+            const offsetMs = baseDate.getTime() - chileTimeAsUTC.getTime();
+
+            // 4. Apply this offset to our desired target time.
+            // We want the result to be: "A timestamp T such that T in Chile is YYYY-MM-DD HH:mm"
+            // So T = UTC_Target + Offset (inverted? no).
+            // Let's think: We want T. 
+            // T in Chile = TargetTime.
+            // T in UTC = TargetTime + (UTC - Chile).
+            // We found (UTC - Chile) = offsetMs.
+            // So T = TargetTime (as UTC timestamp) + offsetMs.
+
+            const targetTimestamp = baseDate.getTime() + offsetMs;
+            const startTime = new Date(targetTimestamp);
 
             const endTime = new Date(startTime);
             endTime.setHours(startTime.getHours() + duration);
