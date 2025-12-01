@@ -25,8 +25,24 @@ interface Game {
 }
 
 export default function BookingCalendar() {
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    // Helper to get "Today" in Chile Time
+    const getChileDate = () => {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Santiago',
+            year: 'numeric', month: 'numeric', day: 'numeric'
+        });
+        const parts = formatter.formatToParts(now);
+        const chileParts: any = {};
+        parts.forEach(p => chileParts[p.type] = p.value);
+        // Return a Date object representing 00:00 on the day it is in Chile
+        // We use the local browser's timezone for the Date object itself, but the *values* (Y,M,D) match Chile.
+        // This ensures the calendar renders the correct "Day" even if the user is in a different timezone.
+        return new Date(parseInt(chileParts.year), parseInt(chileParts.month) - 1, parseInt(chileParts.day));
+    };
+
+    const [currentDate, setCurrentDate] = useState(() => getChileDate());
+    const [selectedDate, setSelectedDate] = useState<Date>(() => getChileDate());
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [duration, setDuration] = useState<number>(1);
     const [pcs, setPcs] = useState<PC[]>([]);
@@ -126,7 +142,7 @@ export default function BookingCalendar() {
                 parseInt(chileParts.second)
             ));
 
-            // The difference in milliseconds. 
+            // The difference in milliseconds.
             // If base (UTC) is 12:00 and Chile says it's 09:00, diff is 3 hours.
             // This means Chile is UTC-3.
             const offsetMs = baseDate.getTime() - chileTimeAsUTC.getTime();
@@ -134,7 +150,7 @@ export default function BookingCalendar() {
             // 4. Apply this offset to our desired target time.
             // We want the result to be: "A timestamp T such that T in Chile is YYYY-MM-DD HH:mm"
             // So T = UTC_Target + Offset (inverted? no).
-            // Let's think: We want T. 
+            // Let's think: We want T.
             // T in Chile = TargetTime.
             // T in UTC = TargetTime + (UTC - Chile).
             // We found (UTC - Chile) = offsetMs.
@@ -176,6 +192,9 @@ export default function BookingCalendar() {
         const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
         const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
+        // Get "Today" in Chile for highlighting
+        const chileToday = getChileDate();
+
         const days = [];
         for (let i = 0; i < firstDay; i++) {
             days.push(<div key={`empty-${i}`} className="aspect-square"></div>);
@@ -183,7 +202,7 @@ export default function BookingCalendar() {
 
         for (let i = 1; i <= daysInMonth; i++) {
             const isSelected = selectedDate?.getDate() === i && selectedDate?.getMonth() === currentDate.getMonth();
-            const isToday = new Date().getDate() === i && new Date().getMonth() === currentDate.getMonth();
+            const isToday = chileToday.getDate() === i && chileToday.getMonth() === currentDate.getMonth();
 
             days.push(
                 <button
@@ -223,7 +242,7 @@ export default function BookingCalendar() {
                     Recibirás tu link de conexión 5 minutos antes de la hora.
                 </p>
                 <button
-                    onClick={() => { setStep(1); setSelectedDate(new Date()); setSelectedTime(null); setSelectedPC(null); }}
+                    onClick={() => { setStep(1); setSelectedDate(getChileDate()); setSelectedTime(null); setSelectedPC(null); }}
                     className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-orbitron rounded-sm transition-colors"
                 >
                     HACER OTRA RESERVA
@@ -253,6 +272,12 @@ export default function BookingCalendar() {
                     </div>
                     <div className="grid grid-cols-7 gap-2">
                         {renderCalendar()}
+                    </div>
+
+                    {/* Timezone Warning */}
+                    <div className="mt-4 p-3 bg-neon-cyan/10 border border-neon-cyan/30 rounded flex items-center gap-2 text-xs text-neon-cyan">
+                        <Clock className="w-4 h-4" />
+                        <span>Todos los horarios corresponden a <strong>Hora de Chile</strong>.</span>
                     </div>
                 </div>
 
