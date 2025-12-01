@@ -152,7 +152,7 @@ export default function AdminReservations() {
                                                 <CalendarIcon className="w-4 h-4 text-gray-500" /> {new Date(res.startTime).toLocaleDateString()}
                                             </div>
                                             <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
-                                                <Clock className="w-3 h-3 text-gray-600" /> {new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                <Clock className="w-3 h-3 text-gray-600" /> {new Date(res.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(res.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </td>
                                         <td className="p-4 text-gray-400">
