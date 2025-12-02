@@ -10,7 +10,6 @@ import {
     Text,
     Button,
     Hr,
-    Img,
 } from '@react-email/components';
 
 interface ParsecEmailProps {
@@ -40,7 +39,7 @@ export const ParsecEmail = ({
                     <Heading style={title}>¡HORA DE JUGAR!</Heading>
                     <Text style={greeting}>HOLA <span style={neonText}>{userName ? userName.toUpperCase() : 'GAMER'}</span>,</Text>
                     <Text style={paragraph}>
-                        Tu sesión {gameName ? `de ${gameName} ` : ''}está a punto de comenzar. Conéctate a tu PC Gamer ahora mismo.
+                        Tu sesión {gameName ? `de ${gameName} ` : ''}está lista. Conéctate a tu PC Gamer ahora mismo.
                     </Text>
 
                     {/* Link Box */}
@@ -52,11 +51,19 @@ export const ParsecEmail = ({
                         </Button>
                     </Section>
 
-                    <Text style={instructionText}>
-                        Si no tienes Parsec instalado, <a href="https://parsec.app/" style={link}>descárgalo aquí</a>.
-                        <br />
-                        Copia el link y pégalo en la sección "Arcade" o "Computers" de la app.
-                    </Text>
+                    {/* Instructions */}
+                    <Section style={instructionsBox}>
+                        <Text style={instructionTitle}>⚠️ INSTRUCCIONES RÁPIDAS</Text>
+                        <Text style={instructionText}>
+                            1. Si no tienes Parsec, <a href="https://parsec.app/" style={link}>descárgalo aquí</a>.
+                        </Text>
+                        <Text style={instructionText}>
+                            2. Copia el link de arriba y pégalo en la sección "Arcade" o "Computers" de la app.
+                        </Text>
+                        <Text style={instructionText}>
+                            3. ¡Disfruta tu sesión con latencia ultra-baja!
+                        </Text>
+                    </Section>
                 </Section>
 
                 <Hr style={hr} />
@@ -160,13 +167,14 @@ const label = {
 
 const linkText = {
     color: '#fff',
-    fontSize: '18px',
+    fontSize: '14px',
     fontFamily: 'monospace',
     backgroundColor: '#000',
-    padding: '10px',
+    padding: '15px',
     borderRadius: '4px',
     marginBottom: '20px',
     wordBreak: 'break-all' as const,
+    border: '1px dashed #333',
 };
 
 const copyButton = {
@@ -183,9 +191,25 @@ const copyButton = {
     boxShadow: '0 0 15px rgba(0, 243, 255, 0.3)',
 };
 
-const instructionText = {
-    color: '#666',
+const instructionsBox = {
+    backgroundColor: 'rgba(0, 243, 255, 0.05)',
+    borderLeft: '4px solid #00f3ff',
+    padding: '20px',
+    marginBottom: '30px',
+    textAlign: 'left' as const,
+};
+
+const instructionTitle = {
+    color: '#00f3ff',
     fontSize: '14px',
+    fontWeight: 'bold',
+    marginBottom: '10px',
+};
+
+const instructionText = {
+    color: '#ccc',
+    fontSize: '14px',
+    margin: '5px 0',
     lineHeight: '20px',
 };
 

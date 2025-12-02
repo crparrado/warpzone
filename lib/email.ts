@@ -159,14 +159,64 @@ export async function sendParsecLinkEmail(email: string, parsecLink: string, use
     console.log(`✅ Parsec link email sent to ${email}`);
   } catch (error) {
     console.error("Error sending Parsec link:", error);
-    // Fallback
+    // Fallback: Rich HTML Template
     try {
+      const safeUserName = userName || "Gamer";
+      const safeGameName = gameName ? `de ${gameName} ` : '';
+
       await resend.emails.send({
         from: 'Warpzone <reservas@warpzone.cl>',
         to: [email],
         subject: '🎮 Tu Link de Acceso Warpzone',
-        html: `<p>Tu link de conexión: <a href="${parsecLink}">${parsecLink}</a></p>`
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #333; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);">
+                
+                <!-- Header -->
+                <div style="background-color: #000; padding: 30px 0; text-align: center; border-bottom: 1px solid #333;">
+                  <h1 style="color: #00f3ff; font-size: 36px; font-weight: 900; letter-spacing: 6px; margin: 0; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);">WARPZONE</h1>
+                  <p style="color: #666; font-size: 10px; letter-spacing: 4px; margin: 5px 0 0;">REMOTE GAMING SYSTEMS</p>
+                </div>
+
+                <!-- Content -->
+                <div style="padding: 40px; text-align: center;">
+                  <h2 style="color: #fff; font-size: 32px; font-weight: bold; margin: 0 0 20px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">¡HORA DE JUGAR!</h2>
+                  <h3 style="color: #fff; font-size: 24px; font-weight: bold; margin: 0 0 20px;">HOLA <span style="color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);">${safeUserName.toUpperCase()}</span>,</h3>
+                  <p style="color: #aaa; font-size: 16px; line-height: 24px; margin: 0 0 30px;">
+                    Tu sesión ${safeGameName}está lista. Conéctate a tu PC Gamer ahora mismo.
+                  </p>
+
+                  <!-- Link Box -->
+                  <div style="background-color: rgba(255, 0, 255, 0.05); border: 1px solid #ff00ff; border-radius: 8px; padding: 30px; margin-bottom: 30px;">
+                    <div style="color: #ff00ff; font-size: 12px; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px;">TU LINK DE CONEXIÓN PARSEC</div>
+                    <div style="color: #fff; font-size: 14px; font-family: monospace; background-color: #000; padding: 15px; border-radius: 4px; margin-bottom: 20px; word-break: break-all; border: 1px dashed #333;">${parsecLink}</div>
+                    <a href="${parsecLink}" style="display: inline-block; background-color: #00f3ff; border-radius: 4px; color: #000; font-size: 16px; font-weight: bold; text-decoration: none; padding: 12px 30px; text-transform: uppercase; box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);">
+                      ABRIR EN PARSEC
+                    </a>
+                  </div>
+
+                  <!-- Instructions -->
+                  <div style="background-color: rgba(0, 243, 255, 0.05); border-left: 4px solid #00f3ff; padding: 20px; margin-bottom: 30px; text-align: left;">
+                    <div style="color: #00f3ff; font-size: 14px; font-weight: bold; margin-bottom: 10px;">⚠️ INSTRUCCIONES RÁPIDAS</div>
+                    <p style="color: #ccc; font-size: 14px; margin: 5px 0; line-height: 20px;">1. Si no tienes Parsec, <a href="https://parsec.app/" style="color: #00f3ff; text-decoration: underline;">descárgalo aquí</a>.</p>
+                    <p style="color: #ccc; font-size: 14px; margin: 5px 0; line-height: 20px;">2. Copia el link de arriba y pégalo en la sección "Arcade" o "Computers" de la app.</p>
+                    <p style="color: #ccc; font-size: 14px; margin: 5px 0; line-height: 20px;">3. ¡Disfruta tu sesión con latencia ultra-baja!</p>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #000; color: #444; font-size: 12px; text-align: center; padding: 20px; border-top: 1px solid #222;">
+                  ¿Problemas para conectar? Habla con soporte en nuestro Discord.<br />
+                  WARPZONE CHILE
+                </div>
+              </div>
+            </body>
+          </html>
+        `
       });
+      console.log("✅ Fallback Parsec email sent.");
     } catch (e) {
       console.error("Fallback failed", e);
     }
