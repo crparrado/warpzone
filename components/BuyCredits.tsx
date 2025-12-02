@@ -4,30 +4,28 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-interface Plan {
-    hours: number;
+interface Product {
+    id: string;
+    name: string;
     price: number;
-    label: string;
+    minutes: number;
+    type: string;
+    description?: string;
     popular?: boolean;
 }
 
 interface BuyCreditsProps {
     discount?: number;
+    products: Product[];
 }
 
-export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
+export default function BuyCredits({ discount = 0, products = [] }: BuyCreditsProps) {
     const [loading, setLoading] = useState<string | null>(null);
     const router = useRouter();
 
-    const plans: Plan[] = [
-        { hours: 1, price: 2000, label: "Partida Rápida" },
-        { hours: 3, price: 5000, label: "Tarde de Gaming", popular: true },
-        { hours: 5, price: 8000, label: "Maratón" },
-    ];
-
-    const handleBuy = async (plan: Plan) => {
+    const handleBuy = async (product: Product) => {
         try {
-            setLoading(plan.label);
+            setLoading(product.name);
 
             const userRes = await fetch("/api/auth/me");
             const user = await userRes.json();
@@ -38,7 +36,7 @@ export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
             }
 
             // Calculate discounted price
-            const finalPrice = Math.round(plan.price * (1 - discount / 100));
+            const finalPrice = Math.round(product.price * (1 - discount / 100));
 
             const response = await fetch("/api/payments/create-preference", {
                 method: "POST",
@@ -46,11 +44,12 @@ export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    title: `${plan.hours} Horas Warpzone`,
+                    title: product.name,
                     quantity: 1,
                     price: finalPrice,
                     userId: user.id,
-                    minutes: plan.hours * 60
+                    minutes: product.minutes,
+                    productId: product.id
                 }),
             });
 
@@ -74,23 +73,29 @@ export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
         }
     };
 
+    // Filter to only show "Ficha" type products if we want to mimic the original "Buy Credits" section,
+    // OR show all. The user said "should be the same", implying full catalog.
+    // However, the section is titled "COMPRA FICHAS".
+    // Let's show all for consistency as requested, but maybe sort by price.
+    const sortedProducts = [...products].sort((a, b) => a.price - b.price);
+
     return (
         <div className="grid gap-6">
-            {plans.map((plan, i) => {
-                const discountedPrice = Math.round(plan.price * (1 - discount / 100));
+            {sortedProducts.map((product) => {
+                const discountedPrice = Math.round(product.price * (1 - discount / 100));
 
                 return (
                     <div
-                        key={i}
-                        onClick={() => !loading && handleBuy(plan)}
+                        key={product.id}
+                        onClick={() => !loading && handleBuy(product)}
                         className={`glass p-6 flex justify-between items-center cursor-pointer hover:border-neon-cyan transition-all 
-                            ${plan.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}
+                            ${product.popular ? 'border-neon-cyan/50 bg-neon-cyan/5' : ''}
                             ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
                     >
                         <div>
-                            <h3 className="text-xl font-bold font-orbitron text-white">{plan.hours} HORA{plan.hours > 1 ? 'S' : ''}</h3>
-                            <p className="text-sm text-gray-400">{plan.label}</p>
+                            <h3 className="text-xl font-bold font-orbitron text-white">{product.name}</h3>
+                            <p className="text-sm text-gray-400">{product.description || `${product.minutes / 60} Horas`}</p>
                             {discount > 0 && (
                                 <span className="inline-block mt-2 bg-neon-magenta text-black text-xs font-bold px-2 py-0.5 rounded">
                                     -{discount}% OFF
@@ -100,18 +105,18 @@ export default function BuyCredits({ discount = 0 }: BuyCreditsProps) {
                         <div className="text-right">
                             {discount > 0 ? (
                                 <>
-                                    <p className="text-sm text-gray-500 line-through">${plan.price.toLocaleString('es-CL')}</p>
+                                    <p className="text-sm text-gray-500 line-through">${product.price.toLocaleString('es-CL')}</p>
                                     <p className="text-2xl font-bold text-neon-magenta">${discountedPrice.toLocaleString('es-CL')}</p>
                                 </>
                             ) : (
-                                <p className="text-2xl font-bold text-neon-cyan">${plan.price.toLocaleString('es-CL')}</p>
+                                <p className="text-2xl font-bold text-neon-cyan">${product.price.toLocaleString('es-CL')}</p>
                             )}
 
                             <button
                                 disabled={!!loading}
                                 className="text-xs text-white underline hover:text-neon-magenta flex items-center justify-end gap-2 ml-auto mt-1"
                             >
-                                {loading === plan.label ? <Loader2 className="w-4 h-4 animate-spin" /> : "COMPRAR"}
+                                {loading === product.name ? <Loader2 className="w-4 h-4 animate-spin" /> : "COMPRAR"}
                             </button>
                         </div>
                     </div>

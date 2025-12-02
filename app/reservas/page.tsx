@@ -6,17 +6,20 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
-async function getDiscount() {
+async function getData() {
     try {
-        const settings = await prisma.systemSettings.findFirst();
-        return settings?.generalDiscount || 0;
+        const [products, settings] = await Promise.all([
+            prisma.product.findMany({ orderBy: { price: 'asc' } }),
+            prisma.systemSettings.findFirst()
+        ]);
+        return { products, discount: settings?.generalDiscount || 0 };
     } catch (error) {
-        return 0;
+        return { products: [], discount: 0 };
     }
 }
 
 export default async function Reservas() {
-    const discount = await getDiscount();
+    const { products, discount } = await getData();
 
     return (
         <div className="min-h-screen pt-24 px-6 pb-12">
@@ -39,7 +42,7 @@ export default async function Reservas() {
                             <h2 className="text-2xl font-orbitron font-bold">COMPRA FICHAS</h2>
                         </div>
 
-                        <BuyCredits discount={discount} />
+                        <BuyCredits discount={discount} products={products} />
                     </div>
 
                     {/* Step 2: Book Slot */}
