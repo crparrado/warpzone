@@ -9,12 +9,18 @@ export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        if (password !== confirmPassword) {
+            setError("Las contraseñas no coinciden");
+            return;
+        }
 
         const res = await fetch("/api/auth/signup", {
             method: "POST",
@@ -79,6 +85,16 @@ export default function SignupPage() {
                             className="w-full bg-black/50 border border-white/10 p-3 text-white focus:border-neon-magenta outline-none transition-colors"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-orbitron text-gray-400 mb-1">CONFIRMAR CONTRASEÑA</label>
+                        <input
+                            type="password"
+                            required
+                            className="w-full bg-black/50 border border-white/10 p-3 text-white focus:border-neon-magenta outline-none transition-colors"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                     </div>
 
