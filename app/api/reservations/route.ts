@@ -73,35 +73,77 @@ export async function POST(request: Request) {
     }
 
     // 5. Find Available PC (Strict Logic)
-    // Fetch all PCs
-    const allPCs = await prisma.pC.findMany({
-        where: { status: "AVAILABLE" }, // Only active PCs
-        orderBy: { name: 'asc' } // Prefer PC 01, then 02...
-    });
+    let availablePC;
+    const { pcId } = body; // Get requested PC ID
 
-    // Fetch conflicting reservations
-    const conflictingReservations = await prisma.reservation.findMany({
-        where: {
-            OR: [
-                {
-                    startTime: { lt: end },
-                    endTime: { gt: start }
-                }
-            ],
-            status: { not: "CANCELLED" }
-        },
-        select: { pcId: true }
-    });
+    if (pcId) {
+        // A. Strict Mode: User requested a specific PC
+        const requestedPC = await prisma.pC.findUnique({
+            where: { id: pcId }
+        });
 
-    const occupiedPCIds = new Set(conflictingReservations.map(r => r.pcId));
+        if (!requestedPC) {
+            return NextResponse.json({ error: "El PC seleccionado no existe." }, { status: 404 });
+        }
 
-    // Find first PC that is NOT in occupied set
-    const availablePC = allPCs.find(pc => !occupiedPCIds.has(pc.id));
+        if (requestedPC.status !== "AVAILABLE") {
+            return NextResponse.json({ error: "El PC seleccionado no está disponible." }, { status: 409 });
+        }
 
-    if (!availablePC) {
-        return NextResponse.json({
-            error: "Lo sentimos, no hay PCs disponibles para este horario. Intenta otra hora."
-        }, { status: 409 }); // 409 Conflict
+        // Check for conflicts specifically on this PC
+        const conflict = await prisma.reservation.findFirst({
+            where: {
+                pcId: pcId,
+                status: { not: "CANCELLED" },
+                OR: [
+                    {
+                        startTime: { lt: end },
+                        endTime: { gt: start }
+                    }
+                ]
+            }
+        });
+
+        if (conflict) {
+            return NextResponse.json({
+                error: `El ${requestedPC.name} ya está reservado en ese horario. Por favor selecciona otro PC u otro horario.`
+            }, { status: 409 });
+        }
+
+        availablePC = requestedPC;
+
+    } else {
+        // B. Fallback Mode: Auto-assign (Legacy behavior)
+        // Fetch all PCs
+        const allPCs = await prisma.pC.findMany({
+            where: { status: "AVAILABLE" }, // Only active PCs
+            orderBy: { name: 'asc' } // Prefer PC 01, then 02...
+        });
+
+        // Fetch conflicting reservations
+        const conflictingReservations = await prisma.reservation.findMany({
+            where: {
+                OR: [
+                    {
+                        startTime: { lt: end },
+                        endTime: { gt: start }
+                    }
+                ],
+                status: { not: "CANCELLED" }
+            },
+            select: { pcId: true }
+        });
+
+        const occupiedPCIds = new Set(conflictingReservations.map(r => r.pcId));
+
+        // Find first PC that is NOT in occupied set
+        availablePC = allPCs.find(pc => !occupiedPCIds.has(pc.id));
+
+        if (!availablePC) {
+            return NextResponse.json({
+                error: "Lo sentimos, no hay PCs disponibles para este horario. Intenta otra hora."
+            }, { status: 409 }); // 409 Conflict
+        }
     }
 
     // 6. Create Reservation & Deduct Credits
