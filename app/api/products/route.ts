@@ -13,10 +13,10 @@ export async function GET() {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
     try {
-        const body = await req.json();
-        const { name, price, minutes, type, description, popular } = body;
+        const body = await request.json();
+        const { name, price, minutes, type, description, popular, active } = body;
 
         if (!name || !price || !minutes || !type || !description) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -25,11 +25,12 @@ export async function POST(req: Request) {
         const product = await prisma.product.create({
             data: {
                 name,
-                price: Number(price),
-                minutes: Number(minutes),
+                price: parseInt(price),
+                minutes: parseInt(minutes),
                 type,
                 description,
-                popular: Boolean(popular)
+                popular: popular || false,
+                active: active !== undefined ? active : true
             }
         });
 
@@ -40,14 +41,18 @@ export async function POST(req: Request) {
     }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(request: Request) {
     try {
-        const body = await req.json();
-        const { id, price } = body;
+        const body = await request.json();
+        const { id, price, active } = body;
+
+        const data: any = {};
+        if (price !== undefined) data.price = Number(price);
+        if (active !== undefined) data.active = active;
 
         const product = await prisma.product.update({
             where: { id },
-            data: { price: Number(price) }
+            data
         });
 
         return NextResponse.json(product);

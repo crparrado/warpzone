@@ -9,7 +9,10 @@ export const dynamic = 'force-dynamic';
 async function getData() {
     try {
         const [products, settings] = await Promise.all([
-            prisma.product.findMany({ orderBy: { price: 'asc' } }),
+            prisma.product.findMany({
+                where: { active: true },
+                orderBy: { price: 'asc' }
+            }),
             prisma.systemSettings.findFirst()
         ]);
         return { products, discount: settings?.generalDiscount || 0 };

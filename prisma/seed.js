@@ -108,56 +108,57 @@ async function main() {
 
     // Seed Products
     const products = [
-        { name: "1 HORA", price: 2000, minutes: 60, type: "Ficha", description: "Partida Rápida", popular: false },
-        { name: "3 HORAS", price: 5000, minutes: 180, type: "Pase", description: "Tarde de Gaming", popular: false },
-        { name: "5 HORAS", price: 8000, minutes: 300, type: "Pase", description: "Maratón", popular: true },
-        { name: "DAY PASS", price: 15000, minutes: 720, type: "Pase", description: "Todo el día (12hrs)", popular: false },
-        { name: "NIGHT PASS", price: 12000, minutes: 480, type: "Pase", description: "Toda la noche (8hrs)", popular: false }
+        { name: "1 HORA", price: 2000, minutes: 60, type: "Ficha", description: "Partida Rápida", popular: false, active: true },
+        { name: "3 HORAS", price: 5000, minutes: 180, type: "Pase", description: "Tarde de Gaming", popular: false, active: true },
+        { name: "5 HORAS", price: 8000, minutes: 300, type: "Pase", description: "Maratón", popular: true, active: true },
+        { name: "DAY PASS", price: 15000, minutes: 720, type: "Pase", description: "Todo el día (12hrs)", popular: false, active: true },
+        { name: "NIGHT PASS", price: 12000, minutes: 480, type: "Pase", description: "Toda la noche (8hrs)", popular: false, active: true }
     ];
 
     for (const product of products) {
-        // Find ALL products with this name to check for duplicates
-        const existingProducts = await prisma.product.findMany({
-            where: { name: product.name },
-            orderBy: { createdAt: 'asc' }
+        // Use upsert to prevent duplicates based on name (assuming name is unique for these base products)
+        // First, find if it exists to get the ID
+        const existing = await prisma.product.findFirst({
+            where: { name: product.name }
         });
 
-        if (existingProducts.length > 0) {
-            // Update the first one (oldest)
-            const toKeep = existingProducts[0];
-            console.log(`Updating existing product: ${toKeep.name} (${toKeep.id})`);
+        if (existing) {
+            console.log(`Updating existing product: ${product.name}`);
             await prisma.product.update({
-                where: { id: toKeep.id },
+                where: { id: existing.id },
                 data: product
             });
-
-            // Delete duplicates if any
-            if (existingProducts.length > 1) {
-                const toDelete = existingProducts.slice(1);
-                console.log(`Found ${toDelete.length} duplicates for ${product.name}. Deleting...`);
-                for (const duplicate of toDelete) {
-                    try {
-                        // Reassign purchases to the master product before deleting
-                        // This fixes the "Foreign key constraint failed" error
-                        const purchases = await prisma.purchase.updateMany({
-                            where: { productId: duplicate.id },
-                            data: { productId: toKeep.id }
-                        });
-
-                        if (purchases.count > 0) {
-                            console.log(`Reassigned ${purchases.count} purchases from ${duplicate.id} to ${toKeep.id}`);
-                        }
-
-                        await prisma.product.delete({ where: { id: duplicate.id } });
-                        console.log(`Deleted duplicate product: ${duplicate.name} (${duplicate.id})`);
-                    } catch (e) {
-                        console.error(`Could not delete duplicate product ${duplicate.name} (${duplicate.id}): ${e.message}`);
-                    }
-                }
-            }
         } else {
             console.log(`Creating new product: ${product.name}`);
             await prisma.product.create({ data: product });
+        }
+
+        // Clean up any EXACT duplicates (same name, different ID) that might have been created by older buggy seeds
+        const duplicates = await prisma.product.findMany({
+            where: {
+                name: product.name,
+                NOT: { id: existing ? existing.id : undefined } // If we just created it, we might not have ID easily, but let's rely on the findFirst above
+            },
+            orderBy: { createdAt: 'desc' } // Keep the one we just updated/created? No, we updated 'existing'.
+        });
+
+        if (existing && duplicates.length > 0) {
+            console.log(`Found ${duplicates.length} extra duplicates for ${product.name}. Cleaning up...`);
+            for (const duplicate of duplicates) {
+                if (duplicate.id !== existing.id) {
+                    try {
+                        // Reassign purchases
+                        await prisma.purchase.updateMany({
+                            where: { productId: duplicate.id },
+                            data: { productId: existing.id }
+                        });
+                        await prisma.product.delete({ where: { id: duplicate.id } });
+                        console.log(`Deleted duplicate: ${duplicate.id}`);
+                    } catch (e) {
+                        console.error(`Failed to delete duplicate ${duplicate.id}: ${e.message}`);
+                    }
+                }
+            }
         }
     }
     console.log(`✅ Seeded ${products.length} products`);

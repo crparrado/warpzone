@@ -9,6 +9,7 @@ interface Product {
     name: string;
     price: number;
     type: string;
+    active: boolean;
 }
 
 export default function AdminProducts() {
@@ -208,7 +209,7 @@ export default function AdminProducts() {
 
                             <div className="mt-4">
                                 <label className="text-xs text-gray-400 mb-1 block">PRECIO BASE (CLP)</label>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 mb-4">
                                     <input
                                         type="number"
                                         value={product.price}
@@ -223,6 +224,35 @@ export default function AdminProducts() {
                                         {saving === product.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                                     </button>
                                 </div>
+
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs text-gray-400">DISPONIBILIDAD</span>
+                                    <button
+                                        onClick={async () => {
+                                            const newStatus = !product.active;
+                                            // Optimistic update
+                                            setProducts(products.map(p => p.id === product.id ? { ...p, active: newStatus } : p));
+                                            try {
+                                                await fetch("/api/products", {
+                                                    method: "PUT",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({ id: product.id, active: newStatus }),
+                                                });
+                                            } catch (error) {
+                                                console.error("Error updating status", error);
+                                                // Revert on error
+                                                setProducts(products.map(p => p.id === product.id ? { ...p, active: !newStatus } : p));
+                                            }
+                                        }}
+                                        className={`w-12 h-6 rounded-full p-1 transition-colors ${product.active ? 'bg-green-500' : 'bg-gray-600'}`}
+                                    >
+                                        <div className={`w-4 h-4 bg-white rounded-full transition-transform ${product.active ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
+                                <div className="text-right text-xs mb-2">
+                                    {product.active ? <span className="text-green-400">VISIBLE</span> : <span className="text-gray-500">OCULTO</span>}
+                                </div>
+
                                 {discount > 0 && (
                                     <div className="mt-2 text-right text-sm">
                                         <span className="text-gray-500 line-through mr-2">${product.price}</span>
